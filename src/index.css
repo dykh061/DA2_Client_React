@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+  --bg-top: #f6f1e8;
+  --bg-bottom: #d7e6f3;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-border: rgba(16, 53, 87, 0.12);
+  --title: #0d2b45;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(255, 203, 119, 0.45), transparent 32%),
+    radial-gradient(circle at 0% 100%, rgba(101, 163, 219, 0.3), transparent 34%),
+    linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.container.py-4 {
+  max-width: 1040px;
+}
+
+h2.text-primary {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--title) !important;
+  letter-spacing: 0.01em;
+}
+
+.bg-light,
+.table,
+.alert,
+.input-group,
+.btn,
+.badge {
+  border-radius: 14px !important;
+}
+
+.bg-light {
+  background: var(--surface) !important;
+  border: 1px solid var(--surface-border) !important;
+  backdrop-filter: blur(8px);
+}
+
+.table {
+  background: var(--surface);
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+}
+
+.table thead th {
+  background-color: #0d2b45;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.alert {
+  border: 1px solid transparent;
+  animation: reveal 220ms ease-out;
+}
+
+@keyframes reveal {
+  from {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .container.py-4 {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
