@@ -36,12 +36,15 @@ const timeSlots = [
   { id: 'slot-11', range: '16:00-17:00', period: 'chiều' },
   { id: 'slot-12', range: '17:00-18:00', period: 'chiều' },
   { id: 'slot-13', range: '18:00-19:00', period: 'tối' },
+  { id: 'slot-14', range: '19:00-20:00', period: 'tối' },
+  { id: 'slot-15', range: '20:00-21:00', period: 'tối' },
+  { id: 'slot-16', range: '21:00-22:00', period: 'tối' },
 ];
 
 const courtSlotStatuses = {
-  1: ['available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'available', 'booked', 'booked'],
-  2: ['booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'booked'],
-  3: ['available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'booked'],
+  1: ['available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'available', 'booked', 'booked', 'available', 'available', 'booked'],
+  2: ['booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'available', 'booked', 'available'],
+  3: ['available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'booked', 'available', 'available', 'available'],
 };
 
 const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
@@ -49,15 +52,28 @@ const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
 function UsersPage() {
   const [date, setDate] = useState('');
   const [selectedCourtId, setSelectedCourtId] = useState(1);
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTimes, setSelectedTimes] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const selectedCourt = courts.find((court) => court.id === selectedCourtId) || null;
-  const activeSlotStatuses = courtSlotStatuses[selectedCourtId] || [];
-  const totalAmount = selectedCourt ? selectedCourt.price : 0;
+  const totalAmount = selectedCourt ? selectedCourt.price * selectedTimes.length : 0;
 
-  const canConfirm = Boolean(date && selectedCourt && selectedTime && customerName.trim() && phoneNumber.trim());
+  const canConfirm = Boolean(date && selectedCourt && selectedTimes.length > 0 && customerName.trim() && phoneNumber.trim());
+
+  const activeSlotStatuses = courtSlotStatuses[selectedCourtId] || [];
+
+  const handleToggleTimeSlot = (slotRange, slotStatus) => {
+    if (slotStatus !== 'available') return;
+
+    setSelectedTimes((previousTimes) => {
+      if (previousTimes.includes(slotRange)) {
+        return previousTimes.filter((time) => time !== slotRange);
+      }
+
+      return [...previousTimes, slotRange];
+    });
+  };
 
   return (
     <div className="booking-screen booking-compact">
@@ -73,14 +89,14 @@ function UsersPage() {
         </div>
 
         <nav className="booking-menu">
-          <a href="#" className="menu-link">
-            <i className="fa-regular fa-house" aria-hidden="true"></i>
+          <Link to="/" className="menu-link">
+            <i className="fa-solid fa-house" aria-hidden="true"></i>
             <span>Trang chủ</span>
-          </a>
-          <a href="#" className="menu-link active">
+          </Link>
+          <Link to="/booking" className="menu-link active">
             <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
             <span>Đặt sân</span>
-          </a>
+          </Link>
           <a href="#" className="menu-link">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
@@ -99,13 +115,13 @@ function UsersPage() {
           <p>Chọn sân và thời gian phù hợp với bạn</p>
         </section>
 
-        <section className="booking-card">
+        <section className="booking-card booking-date-card">
           <h2>
             <i className="fa-regular fa-calendar" aria-hidden="true"></i>
             Chọn ngày
           </h2>
 
-          <label className="field-wrap" htmlFor="booking-date">
+          <label className="field-wrap field-wrap-date" htmlFor="booking-date">
             <i className="fa-regular fa-calendar-days" aria-hidden="true"></i>
             <input
               id="booking-date"
@@ -130,7 +146,7 @@ function UsersPage() {
                 className={`court-item ${selectedCourtId === court.id ? 'selected' : ''}`}
                 onClick={() => {
                   setSelectedCourtId(court.id);
-                  setSelectedTime('');
+                  setSelectedTimes([]);
                 }}
               >
                 <strong>{court.name}</strong>
@@ -164,7 +180,7 @@ function UsersPage() {
 
           <div className="time-table-scroll">
             <div className="time-table">
-              <div className="time-cell heading cell-court">CN DQH</div>
+              <div className="time-cell heading cell-court">Khung giờ</div>
               {timeSlots.map((slot) => (
                 <div key={`${slot.id}-heading`} className="time-cell heading cell-slot">
                   <span>{slot.range}</span>
@@ -175,14 +191,14 @@ function UsersPage() {
               <div className="time-cell court-name">{selectedCourt?.name || 'Sân 1'}</div>
               {timeSlots.map((slot, index) => {
                 const slotStatus = activeSlotStatuses[index] || 'booked';
-                const isSelected = selectedTime === slot.range;
+                const isSelected = selectedTimes.includes(slot.range);
 
                 return (
                   <button
                     type="button"
                     key={slot.id}
                     className={`time-cell slot-btn ${slotStatus} ${isSelected ? 'selected' : ''}`}
-                    onClick={() => slotStatus === 'available' && setSelectedTime(slot.range)}
+                    onClick={() => handleToggleTimeSlot(slot.range, slotStatus)}
                     disabled={slotStatus !== 'available'}
                     title={slotStatus === 'booked' ? 'Khung giờ đã được đặt' : `Chọn ${slot.range}`}
                   >
@@ -231,7 +247,7 @@ function UsersPage() {
             </div>
             <div>
               <dt>Giờ</dt>
-              <dd>{selectedTime || 'Chưa chọn'}</dd>
+              <dd>{selectedTimes.length > 0 ? selectedTimes.join(', ') : 'Chưa chọn'}</dd>
             </div>
             <div>
               <dt>Khách hàng</dt>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-function LoginPage() {
+function RegisterPage() {
   return (
     <div className="login-screen">
       <header className="booking-nav home-nav">
@@ -36,28 +36,37 @@ function LoginPage() {
       </header>
 
       <main className="login-wrapper">
-        <section className="login-card">
+        <section className="login-card register-card">
           <div className="login-top-icon" aria-hidden="true">
-            <i className="fa-solid fa-right-to-bracket"></i>
+            <i className="fa-solid fa-user-plus"></i>
           </div>
 
-          <h1>Đăng nhập</h1>
-          <p>Đăng nhập để tiếp tục đặt sân</p>
+          <h1>Đăng ký</h1>
+          <p>Tạo tài khoản mới để đặt sân</p>
 
           <form className="login-form">
+            <label htmlFor="fullName">Họ và tên</label>
+            <input id="fullName" type="text" placeholder="Nguyễn Văn A" />
+
             <label htmlFor="email">Email</label>
             <input id="email" type="email" placeholder="example@email.com" />
+
+            <label htmlFor="phone">Số điện thoại</label>
+            <input id="phone" type="tel" placeholder="0912345678" />
 
             <label htmlFor="password">Mật khẩu</label>
             <input id="password" type="password" placeholder="........" />
 
+            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
+            <input id="confirmPassword" type="password" placeholder="........" />
+
             <button type="button" className="login-submit-btn">
-              Đăng nhập
+              Đăng ký
             </button>
           </form>
 
           <p className="login-signup">
-            Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+            Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
           </p>
         </section>
       </main>
@@ -65,4 +74,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default RegisterPage;
