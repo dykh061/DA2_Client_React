@@ -458,6 +458,14 @@ body {
 
 .field-wrap-date i {
   font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--brand);
+}
+
+.field-wrap-date i:hover {
+  color: #06a64f;
+  transform: scale(1.15);
 }
 
 .field-wrap-date input {
@@ -692,6 +700,49 @@ body {
   color: var(--brand);
   font-weight: 700;
   font-size: clamp(2rem, 2.5vw, 3rem);
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 60px 40px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.empty-state-icon {
+  font-size: clamp(5rem, 8vw, 8rem);
+  color: var(--text-600);
+  margin-bottom: 24px;
+}
+
+.empty-state-card h2 {
+  font-size: clamp(1.8rem, 2.3vw, 2.8rem);
+  margin: 0 0 16px;
+}
+
+.empty-state-card p {
+  color: var(--text-600);
+  font-size: clamp(1.3rem, 1.8vw, 2rem);
+  margin: 0 0 32px;
+}
+
+.btn-booking-cta {
+  display: inline-block;
+  padding: 14px 32px;
+  background: var(--brand);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: clamp(1.3rem, 1.8vw, 1.8rem);
+  transition: all 0.3s ease;
+}
+
+.btn-booking-cta:hover {
+  background: #06a64f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(2, 169, 82, 0.2);
 }
 
 .confirm-button,
@@ -1044,6 +1095,27 @@ body {
   .summary-total strong,
   .summary-total span {
     font-size: 1.5rem;
+  }
+
+  .empty-state-card {
+    padding: 40px 20px;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+  }
+
+  .empty-state-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .empty-state-card p {
+    font-size: 1rem;
+  }
+
+  .btn-booking-cta {
+    padding: 12px 28px;
+    font-size: 1rem;
   }
 }
 

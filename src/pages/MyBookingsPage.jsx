@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 
-function LoginPage() {
+function MyBookingsPage() {
   return (
-    <div className="login-screen">
-      <header className="booking-nav home-nav">
+    <div className="booking-screen booking-compact">
+      <header className="booking-nav">
         <div className="booking-brand">
           <span className="brand-icon">
             <i className="fa-regular fa-calendar" aria-hidden="true"></i>
@@ -23,7 +23,7 @@ function LoginPage() {
             <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
             <span>Đặt sân</span>
           </Link>
-          <Link to="/my-bookings" className="menu-link">
+          <Link to="/my-bookings" className="menu-link active">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
@@ -35,34 +35,23 @@ function LoginPage() {
         </Link>
       </header>
 
-      <main className="login-wrapper">
-        <section className="login-card">
-          <div className="login-top-icon" aria-hidden="true">
-            <i className="fa-solid fa-right-to-bracket"></i>
+      <main className="booking-content">
+        <section className="booking-intro">
+          <h1>Lịch đặt sân của tôi</h1>
+          <p>Quản lý các lịch đặt sân của bạn</p>
+        </section>
+
+        <section className="booking-card empty-state-card">
+          <div className="empty-state-icon">
+            <i className="fa-regular fa-calendar"></i>
           </div>
-
-          <h1>Đăng nhập</h1>
-          <p>Đăng nhập để tiếp tục đặt sân</p>
-
-          <form className="login-form">
-            <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" required />
-
-            <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" />
-
-            <button type="button" className="login-submit-btn">
-              Đăng nhập
-            </button>
-          </form>
-
-          <p className="login-signup">
-            Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-          </p>
+          <h2>Chưa có lịch đặt sân</h2>
+          <p>Bạn chưa có lịch đặt sân nào. Hãy đặt sân ngay!</p>
+          <Link to="/booking" className="btn-booking-cta">Đặt sân ngay</Link>
         </section>
       </main>
     </div>
   );
 }
 
-export default LoginPage;
+export default MyBookingsPage;

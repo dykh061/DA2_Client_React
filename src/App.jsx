@@ -11,12 +11,14 @@ import CustomerManagement from './pages/CustomerManagement';
 import HistoryPage from './pages/HistoryPage';
 import ReviewsPage from './pages/ReviewsPage';
 import ProfilePage from './pages/ProfilePage';
+import MyBookingsPage from './pages/MyBookingsPage';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/booking" element={<UsersPage />} />
+      <Route path="/my-bookings" element={<MyBookingsPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/admin" element={<AdminLayout />}>
