@@ -1,0 +1,68 @@
+import { Link } from 'react-router-dom';
+
+function LoginPage() {
+  return (
+    <div className="login-screen">
+      <header className="booking-nav home-nav">
+        <div className="booking-brand">
+          <span className="brand-icon">
+            <i className="fa-regular fa-calendar" aria-hidden="true"></i>
+          </span>
+          <div>
+            <strong>BadmintonHub</strong>
+            <p>Đặt sân cầu lông</p>
+          </div>
+        </div>
+
+        <nav className="booking-menu">
+          <Link to="/" className="menu-link">
+            <i className="fa-solid fa-house" aria-hidden="true"></i>
+            <span>Trang chủ</span>
+          </Link>
+          <Link to="/booking" className="menu-link">
+            <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
+            <span>Đặt sân</span>
+          </Link>
+          <Link to="/my-bookings" className="menu-link">
+            <i className="fa-solid fa-list" aria-hidden="true"></i>
+            <span>Lịch của tôi</span>
+          </Link>
+        </nav>
+
+        <Link className="menu-link login-link" to="/login">
+          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          Đăng nhập
+        </Link>
+      </header>
+
+      <main className="login-wrapper">
+        <section className="login-card">
+          <div className="login-top-icon" aria-hidden="true">
+            <i className="fa-solid fa-right-to-bracket"></i>
+          </div>
+
+          <h1>Đăng nhập</h1>
+          <p>Đăng nhập để tiếp tục đặt sân</p>
+
+          <form className="login-form">
+            <label htmlFor="email">Email</label>
+            <input id="email" type="email" placeholder="example@email.com" required />
+
+            <label htmlFor="password">Mật khẩu</label>
+            <input id="password" type="password" placeholder="........" />
+
+            <button type="button" className="login-submit-btn">
+              Đăng nhập
+            </button>
+          </form>
+
+          <p className="login-signup">
+            Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+          </p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export default LoginPage;

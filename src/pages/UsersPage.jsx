@@ -1,220 +1,275 @@
-import { useState, useEffect } from 'react';
-import UserForm from '../components/UserForm';
-import UserTable from '../components/UserTable';
-import {
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-} from '../services/userService';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+const courts = [
+  {
+    id: 1,
+    name: 'Sân 1',
+    type: 'Sân tiêu chuẩn',
+    price: 50000,
+  },
+  {
+    id: 2,
+    name: 'Sân 2',
+    type: 'Sân tiêu chuẩn',
+    price: 50000,
+  },
+  {
+    id: 3,
+    name: 'Sân 3',
+    type: 'Sân tiêu chuẩn',
+    price: 50000,
+  },
+];
+
+const timeSlots = [
+  { id: 'slot-1', range: '06:00-07:00', period: 'sáng' },
+  { id: 'slot-2', range: '07:00-08:00', period: 'sáng' },
+  { id: 'slot-3', range: '08:00-09:00', period: 'sáng' },
+  { id: 'slot-4', range: '09:00-10:00', period: 'sáng' },
+  { id: 'slot-5', range: '10:00-11:00', period: 'sáng' },
+  { id: 'slot-6', range: '11:00-12:00', period: 'sáng' },
+  { id: 'slot-7', range: '12:00-13:00', period: 'trưa' },
+  { id: 'slot-8', range: '13:00-14:00', period: 'chiều' },
+  { id: 'slot-9', range: '14:00-15:00', period: 'chiều' },
+  { id: 'slot-10', range: '15:00-16:00', period: 'chiều' },
+  { id: 'slot-11', range: '16:00-17:00', period: 'chiều' },
+  { id: 'slot-12', range: '17:00-18:00', period: 'chiều' },
+  { id: 'slot-13', range: '18:00-19:00', period: 'tối' },
+  { id: 'slot-14', range: '19:00-20:00', period: 'tối' },
+  { id: 'slot-15', range: '20:00-21:00', period: 'tối' },
+  { id: 'slot-16', range: '21:00-22:00', period: 'tối' },
+];
+
+const courtSlotStatuses = {
+  1: ['available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'available', 'booked', 'booked', 'available', 'available', 'booked'],
+  2: ['booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'available', 'booked', 'available'],
+  3: ['available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'booked', 'available', 'available', 'available'],
+};
+
+const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
 
 function UsersPage() {
-  const [users, setUsers] = useState([]);
-  const [editingUser, setEditingUser] = useState(null);
-  const [lookupId, setLookupId] = useState('');
-  const [lookedUpUser, setLookedUpUser] = useState(null);
-  const [loadingList, setLoadingList] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [feedback, setFeedback] = useState(null);
+  const [date, setDate] = useState('');
+  const [selectedCourtId, setSelectedCourtId] = useState(1);
+  const [selectedTimes, setSelectedTimes] = useState([]);
+  const [customerName, setCustomerName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
-  const isDev = import.meta.env.DEV;
-  const usersEndpoint = isDev
-    ? '/api/users (proxy -> https://da2-sever-nodejs.onrender.com/users)'
-    : `${import.meta.env.VITE_API_BASE_URL}/users`;
+  const selectedCourt = courts.find((court) => court.id === selectedCourtId) || null;
+  const totalAmount = selectedCourt ? selectedCourt.price * selectedTimes.length : 0;
 
-  const toErrorMessage = (err, fallback) => err?.message || fallback;
+  const canConfirm = Boolean(date && selectedCourt && selectedTimes.length > 0 && customerName.trim() && phoneNumber.trim());
 
-  const runAction = async (action, { successMessage, keepFeedback = false } = {}) => {
-    setBusy(true);
+  const activeSlotStatuses = courtSlotStatuses[selectedCourtId] || [];
 
-    try {
-      await action();
+  const handleToggleTimeSlot = (slotRange, slotStatus) => {
+    if (slotStatus !== 'available') return;
 
-      if (successMessage) {
-        setFeedback({ type: 'success', message: successMessage });
-      } else if (!keepFeedback) {
-        setFeedback(null);
-      }
-      return true;
-    } catch (err) {
-      console.error(err);
-      setFeedback({
-        type: 'danger',
-        message: toErrorMessage(err, 'Có lỗi xảy ra khi gọi API'),
-      });
-      return false;
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const loadUsers = async () => {
-    setLoadingList(true);
-    const ok = await runAction(async () => {
-      const data = await getUsers();
-      setUsers(Array.isArray(data) ? data : []);
-    }, { keepFeedback: true });
-    setLoadingList(false);
-    return ok;
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const handleSave = async (name, id) => {
-    const successMessage = id
-      ? `Cập nhật user #${id} thành công.`
-      : 'Tạo user thành công.';
-
-    return runAction(async () => {
-      if (id) {
-        await updateUser(id, name);
-      } else {
-        await createUser(name);
+    setSelectedTimes((previousTimes) => {
+      if (previousTimes.includes(slotRange)) {
+        return previousTimes.filter((time) => time !== slotRange);
       }
 
-      setEditingUser(null);
-      await loadUsers();
-    }, { successMessage });
-  };
-
-  const handleCreateSampleUser = async () => {
-    const sampleName = `Sample User 1 - ${new Date().toLocaleString('sv-SE').replace(' ', '_')}`;
-
-    await runAction(async () => {
-      await createUser(sampleName);
-      await loadUsers();
-    }, {
-      successMessage: `Đã gửi tạo user mẫu: ${sampleName}`,
+      return [...previousTimes, slotRange];
     });
-  };
-
-  const handleGetById = async () => {
-    const normalizedId = Number(lookupId);
-
-    if (!Number.isInteger(normalizedId) || normalizedId <= 0) {
-      setFeedback({
-        type: 'warning',
-        message: 'Vui lòng nhập ID hợp lệ (số nguyên dương).',
-      });
-      setLookedUpUser(null);
-      return;
-    }
-
-    await runAction(async () => {
-      const user = await getUserById(normalizedId);
-      setLookedUpUser(user);
-    }, {
-      successMessage: 'Đã tìm thấy người dùng.',
-    });
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc muốn xóa User này không?')) {
-      await runAction(async () => {
-        await deleteUser(id);
-        await loadUsers();
-      }, {
-        successMessage: `Đã xóa user #${id}.`,
-      });
-    }
   };
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-2 text-primary">Quản lý người dùng</h2>
-      <p className="text-muted mb-4">
-        Kết nối máy chủ: <strong>{usersEndpoint}</strong>
-      </p>
-
-      <div className="d-flex gap-2 flex-wrap mb-3">
-        <button
-          className="btn btn-outline-primary"
-          onClick={loadUsers}
-          disabled={busy || loadingList}
-        >
-          Tải lại danh sách
-        </button>
-        {(busy || loadingList) && <span className="badge text-bg-secondary p-2">Đang gọi API...</span>}
-      </div>
-
-      {feedback && (
-        <div className={`alert alert-${feedback.type}`} role="alert">
-          {feedback.message}
-        </div>
-      )}
-
-      <UserForm
-        editingUser={editingUser}
-        onSave={handleSave}
-        onCancel={() => setEditingUser(null)}
-        onCreateSample={handleCreateSampleUser}
-        busy={busy || loadingList}
-      />
-
-      <div className="row g-3 mb-4">
-        <div className="col-md-8">
-          <div className="input-group">
-            <span className="input-group-text">ID</span>
-            <input
-              type="number"
-              min="1"
-              className="form-control"
-              placeholder="Nhập ID người dùng..."
-              value={lookupId}
-              onChange={(e) => setLookupId(e.target.value)}
-              disabled={busy || loadingList}
-            />
-            <button
-              className="btn btn-outline-dark"
-              onClick={handleGetById}
-              disabled={busy || loadingList}
-            >
-              Tìm kiếm
-            </button>
+    <div className="booking-screen booking-compact">
+      <header className="booking-nav">
+        <div className="booking-brand">
+          <span className="brand-icon">
+            <i className="fa-regular fa-calendar" aria-hidden="true"></i>
+          </span>
+          <div>
+            <strong>BadmintonHub</strong>
+            <p>Đặt sân cầu lông</p>
           </div>
         </div>
-        <div className="col-md-4">
-          <button
-            className="btn btn-outline-secondary w-100"
-            onClick={() => {
-              setLookedUpUser(null);
-              setLookupId('');
-            }}
-            disabled={busy || loadingList}
-          >
-            Xóa kết quả
-          </button>
-        </div>
-      </div>
 
-      {lookedUpUser && (
-        <div className="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <span>
-            Kết quả: <strong>{lookedUpUser.name}</strong>
-          </span>
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => setEditingUser(lookedUpUser)}
-            disabled={busy || loadingList}
-          >
-            Chỉnh sửa
-          </button>
-        </div>
-      )}
+        <nav className="booking-menu">
+          <Link to="/" className="menu-link">
+            <i className="fa-solid fa-house" aria-hidden="true"></i>
+            <span>Trang chủ</span>
+          </Link>
+          <Link to="/booking" className="menu-link active">
+            <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
+            <span>Đặt sân</span>
+          </Link>
+          <Link to="/my-bookings" className="menu-link">
+            <i className="fa-solid fa-list" aria-hidden="true"></i>
+            <span>Lịch của tôi</span>
+          </Link>
+        </nav>
 
-      {loadingList ? (
-        <p className="text-center">Đang tải dữ liệu...</p>
-      ) : (
-        <UserTable
-          users={users}
-          onEdit={setEditingUser}
-          onDelete={handleDelete}
-          busy={busy || loadingList}
-        />
-      )}
+        <Link className="menu-link login-link" to="/login">
+          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          Đăng nhập
+        </Link>
+      </header>
+
+      <main className="booking-content">
+        <section className="booking-intro">
+          <h1>Đặt sân cầu lông</h1>
+          <p>Chọn sân và thời gian phù hợp với bạn</p>
+        </section>
+
+        <section className="booking-card booking-date-card">
+          <h2>
+            <i className="fa-regular fa-calendar" aria-hidden="true"></i>
+            Chọn ngày
+          </h2>
+
+          <label className="field-wrap field-wrap-date" htmlFor="booking-date">
+            <i className="fa-regular fa-calendar-days" aria-hidden="true"></i>
+            <input
+              id="booking-date"
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </label>
+        </section>
+
+        <section className="booking-card">
+          <h2>
+            <i className="fa-solid fa-location-dot" aria-hidden="true"></i>
+            Chọn sân
+          </h2>
+
+          <div className="court-list">
+            {courts.map((court) => (
+              <button
+                type="button"
+                key={court.id}
+                className={`court-item ${selectedCourtId === court.id ? 'selected' : ''}`}
+                onClick={() => {
+                  setSelectedCourtId(court.id);
+                  setSelectedTimes([]);
+                }}
+              >
+                <strong>{court.name}</strong>
+                <span>{court.type}</span>
+                <em>{formatCurrency(court.price)}/giờ</em>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="booking-card">
+          <h2>
+            <i className="fa-regular fa-clock" aria-hidden="true"></i>
+            Chọn giờ
+          </h2>
+
+          <div className="slot-status-legend" aria-label="Chú thích trạng thái sân">
+            <span>
+              <i className="legend-dot available" aria-hidden="true"></i>
+              Trống
+            </span>
+            <span>
+              <i className="legend-dot booked" aria-hidden="true"></i>
+              Đã đặt
+            </span>
+            <span>
+              <i className="legend-dot selected" aria-hidden="true"></i>
+              Đang chọn
+            </span>
+          </div>
+
+          <div className="time-table-scroll">
+            <div className="time-table">
+              <div className="time-cell heading cell-court">Khung giờ</div>
+              {timeSlots.map((slot) => (
+                <div key={`${slot.id}-heading`} className="time-cell heading cell-slot">
+                  <span>{slot.range}</span>
+                  <small>{slot.period}</small>
+                </div>
+              ))}
+
+              <div className="time-cell court-name">{selectedCourt?.name || 'Sân 1'}</div>
+              {timeSlots.map((slot, index) => {
+                const slotStatus = activeSlotStatuses[index] || 'booked';
+                const isSelected = selectedTimes.includes(slot.range);
+
+                return (
+                  <button
+                    type="button"
+                    key={slot.id}
+                    className={`time-cell slot-btn ${slotStatus} ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleToggleTimeSlot(slot.range, slotStatus)}
+                    disabled={slotStatus !== 'available'}
+                    title={slotStatus === 'booked' ? 'Khung giờ đã được đặt' : `Chọn ${slot.range}`}
+                  >
+                    {isSelected ? 'Đang chọn' : slotStatus === 'available' ? 'Trống' : 'Đã đặt'}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="booking-card customer-card">
+          <h2>Thông tin khách hàng</h2>
+
+          <label htmlFor="customer-name">Họ và tên</label>
+          <input
+            id="customer-name"
+            type="text"
+            placeholder="Nguyễn Văn A"
+            value={customerName}
+            onChange={(event) => setCustomerName(event.target.value)}
+          />
+
+          <label htmlFor="customer-phone">Số điện thoại</label>
+          <input
+            id="customer-phone"
+            type="tel"
+            placeholder="0912345678"
+            value={phoneNumber}
+            onChange={(event) => setPhoneNumber(event.target.value)}
+            required
+          />
+        </section>
+
+        <section className="booking-card summary-card">
+          <h2>Tóm tắt đặt sân</h2>
+          <p className="summary-subtitle">Kiểm tra thông tin trước khi xác nhận</p>
+
+          <dl>
+            <div>
+              <dt>Ngày</dt>
+              <dd>{date || 'Chưa chọn'}</dd>
+            </div>
+            <div>
+              <dt>Sân</dt>
+              <dd>{selectedCourt?.name || 'Chưa chọn'}</dd>
+            </div>
+            <div>
+              <dt>Giờ</dt>
+              <dd>{selectedTimes.length > 0 ? selectedTimes.join(', ') : 'Chưa chọn'}</dd>
+            </div>
+            <div>
+              <dt>Khách hàng</dt>
+              <dd>{customerName.trim() || 'Chưa nhập'}</dd>
+            </div>
+            <div>
+              <dt>Số điện thoại</dt>
+              <dd>{phoneNumber.trim() || 'Chưa nhập'}</dd>
+            </div>
+          </dl>
+
+          <div className="summary-total">
+            <strong>Tổng tiền</strong>
+            <span>{formatCurrency(totalAmount)}</span>
+          </div>
+
+          <button type="button" className="confirm-button" disabled={!canConfirm}>
+            Xác nhận đặt sân
+          </button>
+        </section>
+      </main>
     </div>
   );
 }
