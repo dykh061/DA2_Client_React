@@ -1,6 +1,26 @@
 import { Link } from 'react-router-dom';
-
+import { useState } from "react";
+import { login } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 function LoginPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    //Chưa có giao diện báo lỗi
+    //Chưa có kiểm tra nhập mail, password này kia
+    try {
+      const data = await login(email, password);
+      localStorage.setItem("accessToken", data.tokens.accessToken);
+      alert("Đăng nhập thành công");
+      navigate("/booking");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   return (
     <div className="login-screen">
       <header className="booking-nav home-nav">
@@ -46,12 +66,16 @@ function LoginPage() {
 
           <form className="login-form">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" />
+            <input id="email" type="email" placeholder="example@email.com" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}/>
 
             <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" />
+            <input id="password" type="password" placeholder="........" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}/>
 
-            <button type="button" className="login-submit-btn">
+            <button type="button" className="login-submit-btn" onClick={handleLogin}>
               Đăng nhập
             </button>
           </form>
