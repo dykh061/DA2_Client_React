@@ -43,10 +43,10 @@ function LoginPage() {
             <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
             <span>Đặt sân</span>
           </Link>
-          <a href="#" className="menu-link">
+          <Link to="/my-bookings" className="menu-link">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
-          </a>
+          </Link>
         </nav>
 
         <Link className="menu-link login-link" to="/login">
@@ -66,7 +66,7 @@ function LoginPage() {
 
           <form className="login-form">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" 
+            <input id="email" type="email" placeholder="example@email.com" required 
             value={email}
             onChange={(e) => setEmail(e.target.value)}/>
 

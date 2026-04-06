@@ -97,10 +97,10 @@ function UsersPage() {
             <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
             <span>Đặt sân</span>
           </Link>
-          <a href="#" className="menu-link">
+          <Link to="/my-bookings" className="menu-link">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
-          </a>
+          </Link>
         </nav>
 
         <Link className="menu-link login-link" to="/login">
@@ -229,6 +229,7 @@ function UsersPage() {
             placeholder="0912345678"
             value={phoneNumber}
             onChange={(event) => setPhoneNumber(event.target.value)}
+            required
           />
         </section>
 

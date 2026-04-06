@@ -62,10 +62,10 @@ function RegisterPage() {
             <i className="fa-regular fa-calendar-check" aria-hidden="true"></i>
             <span>Đặt sân</span>
           </Link>
-          <a href="#" className="menu-link">
+          <Link to="/my-bookings" className="menu-link">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
-          </a>
+          </Link>
         </nav>
 
         <Link className="menu-link login-link" to="/login">
@@ -88,12 +88,12 @@ function RegisterPage() {
             <input id="fullName" type="text" placeholder="Nguyễn Văn A" />
 
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" 
+            <input id="email" type="email" placeholder="example@email.com" required 
             value={email}
             onChange={(e) => setEmail(e.target.value)}/>
 
             <label htmlFor="phone">Số điện thoại</label>
-            <input id="phone" type="tel" placeholder="0912345678" />
+            <input id="phone" type="tel" placeholder="0912345678" required />
 
             <label htmlFor="password">Mật khẩu</label>
             <input id="password" type="password" placeholder="........" 
