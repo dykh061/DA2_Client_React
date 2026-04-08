@@ -23,15 +23,15 @@ const requestJson = async (url, options = {}, fallbackMessage) => {
     headers,
   });
 
-    if (res.status === 401 || res.status === 403) {
-    localStorage.clear();
-    navigate ("/login");
-    return;
-  }
-  
-  if (!res.ok) {
-    const errorMessage = await parseErrorMessage(res, fallbackMessage);
+    if (!res.ok) {
+       const errorMessage = await parseErrorMessage(res, fallbackMessage);
     throw new Error(`${errorMessage} (HTTP ${res.status})`);
+    if (res.status === 401 || res.status === 403) { 
+    localStorage.clear();
+    window.location.href = "/login"; 
+    }
+   
+    
   }
 
   if (res.status === 204) return null;

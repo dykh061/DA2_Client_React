@@ -25,15 +25,15 @@ const requestJson = async (url, options = {}, fallbackMessage) => {
     headers,
   });
 
-    if (res.status === 401 || res.status === 403) {
-    localStorage.clear();
-    navigate ("/login");
-    return;
-  }
-
-  if (!res.ok) {
+   if (!res.ok) {
     const errorMessage = await parseErrorMessage(res, fallbackMessage);
     throw new Error(`${errorMessage} (HTTP ${res.status})`);
+    if (res.status === 401 || res.status === 403) { 
+    localStorage.clear();
+    window.location.href = "/login"; 
+    }
+    
+    
   }
 
   if (res.status === 204) return null;
@@ -63,12 +63,13 @@ export const getUser = async () => {
 
 export const updateUser = async (formData) => {
   const token = localStorage.getItem("accessToken");
+  
 
   const body = {
     username: formData.name,          // map
     email: formData.email,
     phone_number: formData.phone,     // map
-    password: formData.password || "" // nếu không có thì để rỗng
+    password: formData.password// nếu không có thì để rỗng
   };
 
   const res = await requestJson(

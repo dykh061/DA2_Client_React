@@ -32,7 +32,7 @@ const AdminLayout = () => {
 
   if (!token || isTokenExpired(token)) {
     localStorage.clear();
-    navigate("/login");
+    navigate("../login");
     return;
   }
 
@@ -44,7 +44,7 @@ const AdminLayout = () => {
     } catch (err) {
       alert(err.message);
       localStorage.clear();
-      navigate("/login");
+      navigate("../login");
     }
   };
 
@@ -102,7 +102,7 @@ const AdminLayout = () => {
               <Dropdown align="end" className="profile-dropdown">
                 <Dropdown.Toggle as="div" className="user-profile-toggle">
                   <div className="user-info d-none d-sm-block">
-                    <span className="user-name">{user?.data.username || "trống"}</span>
+                    <span className="user-name">{user?.data.username || ""}</span>
                     {/* <span className="user-role">Administrator</span> */}
                   </div>
                   <div className="avatar-wrapper">

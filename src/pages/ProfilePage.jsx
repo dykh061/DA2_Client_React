@@ -37,13 +37,13 @@ const ProfilePage = () => {
 
   if (!token || token === "null" || token === "undefined") {
     localStorage.clear();
-    navigate("/login");
+    navigate("../login");
     return;
   }
 
   if (isTokenExpired(token)) {
     localStorage.clear();
-    navigate("/login");
+    navigate("../login");
     return;
   }
 
@@ -54,15 +54,14 @@ const ProfilePage = () => {
       setFormData({
       name: data.data.username || "",
       email: data.data.email || "",
-      phone: data.data.phone || data.data.phone_number || "",
+      phone: data.data.phone_number || "",
       password: ""
     });
       localStorage.setItem("user", JSON.stringify(data));
     } catch (err) {
-      alert(err.message);
 
       localStorage.clear();
-      navigate("/login");
+      navigate("../login");
     }
   };
 
@@ -72,6 +71,7 @@ const ProfilePage = () => {
 const handleUpdate = async (e) => {
   e.preventDefault();
 
+
   
   const payload = {
   name: formData.name,
@@ -79,24 +79,26 @@ const handleUpdate = async (e) => {
   phone: formData.phone,
   password: passwordData.newPassword 
   };
-
+    
   if (passwordData.newPassword || passwordData.confirmPassword) {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("Mật khẩu xác nhận không khớp");
       return;
     }
   }
-
+if(!passwordData.newPassword) {
+    passwordData.newPassword=passwordData.oldPassword;
+  }
   try {
     const res = await updateUser(payload);
     if (isTokenExpired(token)) {
       localStorage.clear();
-      navigate("/login");
+      navigate("../login");
     }
     localStorage.setItem("user", JSON.stringify(res.data));
 
     alert("Cập nhật thành công");
-    navigate("/login");
+    navigate("../login");
   } catch (err) {
     alert(err.message);
   }
@@ -140,7 +142,7 @@ const handleUpdate = async (e) => {
               </Button>
             </div>
             <h4 className="fw-bold mb-1">
-              {user?.data.username || "Chưa đăng nhập"}
+              {user?.data.username || ""}
             </h4>
             <p className="text-muted mb-3 italic">Hệ thống quản lý sân cầu lông</p>
             <div className="d-flex justify-content-center gap-2 mb-4">

@@ -26,8 +26,27 @@ const homeCourts = [
   },
 ];
 
+ 
 function HomePage() {
-  
+   const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token || isTokenExpired(token)) {
+      localStorage.clear();
+    }
+    if (!token || isTokenExpired(token)) {
+      localStorage.clear();
+}
+  }, []);
   return (
     <div className="home-screen">
       <header className="booking-nav home-nav">

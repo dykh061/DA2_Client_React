@@ -62,7 +62,7 @@ const CustomerManagementForm = ({ show, onHide, onSubmit, customer }) => {
               </Form.Group>
             </Col>
 
-            <Col md={6}>
+            {/* <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label className="small fw-bold text-secondary text-uppercase">Vai trò</Form.Label>
                 <Form.Select 
@@ -88,7 +88,7 @@ const CustomerManagementForm = ({ show, onHide, onSubmit, customer }) => {
                   <option value="inactive">Tạm khóa</option>
                 </Form.Select>
               </Form.Group>
-            </Col>
+            </Col> */}
 
             {!isEdit && (
               <Col md={12}>

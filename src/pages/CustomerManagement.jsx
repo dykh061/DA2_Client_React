@@ -1,13 +1,12 @@
-import React, { useState } from 'react'; // Import React và hook useState để quản lý trạng thái
+import React, { useState, useEffect } from 'react'; // Import React và hook useState để quản lý trạng thái
 import { Card, Button, Row, Col, InputGroup, Form } from 'react-bootstrap'; // Import các UI components từ thư viện Bootstrap
 import { FaPlus, FaSearch } from 'react-icons/fa'; // Import các icon: Dấu cộng (Add) và Kính lúp (Search)
 import UserTable from '../components/CustomerManagementTable.jsx'; // Import component hiển thị bảng danh sách
 import UserForm from '../components/CustomerManagementForm.jsx'; // Import component hiển thị Modal form (thêm/sửa)
-
-
-
+import { getAllUsers,getUser, updateUser } from '../services/userService.js'; // Import hàm lấy danh sách người dùng từ API
+import { useNavigate } from "react-router-dom"; // Import hook để điều hướng trang
+import { register } from '../services/authService.js';
 const CustomerManagement = () => {
-  const [user, setUser] = useState(null);
   // --- KHAI BÁO CÁC STATE (TRẠNG THÁI) ---
   const [showModal, setShowModal] = useState(false); // Trạng thái đóng/mở Modal form (true: mở, false: đóng)
   const [editingCustomer, setEditingCustomer] = useState(null); // Lưu dữ liệu người dùng đang được chọn để sửa (null nếu là thêm mới)
@@ -15,12 +14,69 @@ const CustomerManagement = () => {
   const [roleFilter, setRoleFilter] = useState(''); // Lưu giá trị bộ lọc theo vai trò (admin/staff)
   const [statusFilter, setStatusFilter] = useState(''); // Lưu giá trị bộ lọc theo trạng thái (active/inactive)
 
-  // Dữ liệu mẫu (Fake data) khởi tạo ban đầu
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Nguyễn Văn A', email: 'vana@example.com', role: 'admin', status: 'active' },
-    { id: 2, name: 'Trần Thị B', email: 'thib@example.com', role: 'staff', status: 'active' },
-    { id: 3, name: 'Lê Văn C', email: 'vanc@example.com', role: 'staff', status: 'inactive' },
-  ]);
+const [users, setUsers] = useState([]);
+
+ const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+  
+    useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+  
+    if (!token || isTokenExpired(token)) {
+      localStorage.clear();
+      navigate("../login");
+      return;
+    }
+  
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      } catch (err) {
+        alert(err.message);
+        localStorage.clear();
+        navigate("../login");
+      }
+    };
+  
+    fetchUser();
+    }, [])
+
+
+
+const fetchAllUsers = async () => {
+  try {
+    const res = await getAllUsers();
+
+    // res là mảng user
+    const mappedUsers = res.data.map(u => ({
+      id: u.id,
+      name: u.username,
+      email: u.email,
+      phone: u.phone_number,
+    }));
+
+    setUsers(mappedUsers);
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+useEffect(() => {
+  fetchAllUsers();
+}, []);
+
 
   // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
 
@@ -37,20 +93,31 @@ const CustomerManagement = () => {
   };
 
   // Hàm xử lý khi nhấn "Lưu" trên Form (cả Thêm và Sửa)
-  const handleSubmitUser = (userData) => {
+  const handleSubmitUser = async (userData) => {
+  try {
+    const payload = {
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone,
+      password: userData.password 
+    };
     if (editingCustomer) {
-      // TRƯỜNG HỢP CẬP NHẬT: Duyệt qua mảng users, tìm đúng ID và thay thế dữ liệu mới
-      setUsers(users.map(u => u.id === editingCustomer.id ? { ...u, ...userData } : u));
+      // ===== UPDATE =====
+      await updateUser(userData);
+      alert("Cập nhật thành công");
     } else {
-      // TRƯỜNG HỢP THÊM MỚI: Tạo ID tự động (max + 1) và thêm vào đầu danh sách
-      const newUser = {
-        ...userData,
-        id: Math.max(...users.map(u => u.id), 0) + 1,
-      };
-      setUsers([newUser, ...users]);
+      // ===== CREATE (REGISTER) =====
+      await register(userData.email, userData.password);
+      alert("Thêm người dùng thành công");
     }
-    setShowModal(false); // Lưu xong thì đóng Modal
-  };
+
+    await fetchAllUsers(); // reload list
+    setShowModal(false);
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   // Hàm xóa người dùng
   const handleDeleteUser = (id) => {
@@ -168,14 +235,15 @@ const CustomerManagement = () => {
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteUser}
         />
+        
       </div>
 
       {/* Component Modal Form (ẩn/hiện dựa trên state showModal) */}
-      <UserForm 
+     <UserForm 
         show={showModal} 
-        onHide={() => setShowModal(false)} // Hàm đóng modal
-        onSubmit={handleSubmitUser} // Hàm xử lý khi submit dữ liệu
-        user={editingCustomer} // Truyền dữ liệu người dùng đang sửa (nếu có)
+        onHide={() => setShowModal(false)}
+        onSubmit={handleSubmitUser}
+        customer={editingCustomer}  
       />
     </div>
   );

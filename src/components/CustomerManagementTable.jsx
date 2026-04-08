@@ -10,8 +10,8 @@ const CustomerManagementTable = ({ customers = [], onEdit, onDelete }) => {
             <th className="ps-4 py-3 text-secondary small fw-bold text-uppercase">ID</th>
             <th className="py-3 text-secondary small fw-bold text-uppercase">Họ tên</th>
             <th className="py-3 text-secondary small fw-bold text-uppercase">Email</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Vai trò</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Trạng thái</th>
+            {/* <th className="py-3 text-secondary small fw-bold text-uppercase">Vai trò</th>
+            <th className="py-3 text-secondary small fw-bold text-uppercase">Trạng thái</th> */}
             <th className="py-3 text-secondary small fw-bold text-uppercase text-end pe-4">Thao tác</th>
           </tr>
         </thead>
@@ -21,8 +21,8 @@ const CustomerManagementTable = ({ customers = [], onEdit, onDelete }) => {
               <td className="ps-4 text-muted small">#{item.id}</td>
               <td className="fw-bold text-dark">{item.name}</td>
               <td className="text-secondary">{item.email}</td>
-              <td>
-                <Badge bg={item.role === 'admin' ? 'danger' : 'info'} className="text-white fw-medium px-2 py-1">
+              {/* <td> */}
+                {/* <Badge bg={item.role === 'admin' ? 'danger' : 'info'} className="text-white fw-medium px-2 py-1">
                   {item.role === 'admin' ? 'Quản trị' : 'Nhân viên'}
                 </Badge>
               </td>
@@ -30,7 +30,7 @@ const CustomerManagementTable = ({ customers = [], onEdit, onDelete }) => {
                 <Badge bg={item.status === 'active' ? 'success' : 'secondary'} className="px-2 py-1 fw-medium">
                   {item.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
                 </Badge>
-              </td>
+              </td> */}
               <td className="text-end pe-4">
                 <Button variant="link" size="sm" className="text-primary p-0 me-3 text-decoration-none fw-bold" onClick={() => onEdit(item)}>
                   Sửa

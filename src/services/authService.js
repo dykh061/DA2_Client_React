@@ -3,14 +3,19 @@ import {API_ENDPOINTS} from '../config/api';
 const requestJson = async (url, options, fallbackMessage) => {
   const res = await fetch(url, options);
 
+  
+
   if (!res.ok) {
     const errorMessage = await parseErrorMessage(res, fallbackMessage);
     throw new Error(`${errorMessage} (HTTP ${res.status})`);
+    if (res.status === 401 || res.status === 403) {
+    localStorage.clear();
+    window.location.href = "/login"; 
   }
-  if (res.status === 401 || res.status === 403) {
-    clearAuthData();
-    throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    
+    
   }
+  
   
   if (res.status === 204) return null;
   return res.json();
