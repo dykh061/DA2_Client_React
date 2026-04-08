@@ -30,6 +30,7 @@ function App() {
         <Route path="history" element={<HistoryPage/>} />
         <Route path="reviews" element={<ReviewsPage />} />
       </Route>
+      
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

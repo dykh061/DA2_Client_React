@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
 
 const homeCourts = [
   {
@@ -26,6 +27,7 @@ const homeCourts = [
 ];
 
 function HomePage() {
+  
   return (
     <div className="home-screen">
       <header className="booking-nav home-nav">
@@ -54,10 +56,7 @@ function HomePage() {
           </Link>
         </nav>
 
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
-          Đăng nhập
-        </Link>
+        
       </header>
 
       <section className="home-hero">

@@ -29,12 +29,9 @@ function RegisterPage() {
     }
     try {
       const data = await register(email, password);
-
-      localStorage.setItem("accessToken", data.tokens.accessToken);
-
       alert("Đăng ký thành công");
-
-      navigate("/booking");
+      localStorage.setItem("accessToken", data.accessToken);
+      navigate("/my-bookings");
     } catch (err) {
       alert(err.message);
     }
@@ -68,10 +65,12 @@ function RegisterPage() {
           </Link>
         </nav>
 
+        
         <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          <i className="fa-regular fa-user"></i>
           Đăng nhập
         </Link>
+      
       </header>
 
       <main className="login-wrapper">

@@ -1,20 +1,55 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { Nav, Navbar, Container, Dropdown, Image } from 'react-bootstrap';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { FaTachometerAlt, FaUsers, FaTableTennis, FaHistory, FaCalendarAlt, FaStar, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
-
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
 const AdminLayout = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const [user, setUser] = React.useState(null);
   const menuItems = [
     { title: 'Dashboard', path: '/admin/dashboard', icon: <FaTachometerAlt /> },
     { title: 'Người dùng', path: '/admin/customers', icon: <FaUsers /> },
     { title: 'Quản lý Sân', path: '/admin/courts', icon: <FaTableTennis /> },
-    { title: 'Đặt sân', path: '/admin/bookings', icon: <FaCalendarAlt /> },
+    { title: 'Đặt sân', path: '../my-bookings', icon: <FaCalendarAlt /> },
     { title: 'Lịch sử', path: '/admin/history', icon: <FaHistory /> },
     { title: 'Đánh giá', path: '/admin/reviews', icon: <FaStar /> },
   ];
 
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  };
+  useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token || isTokenExpired(token)) {
+    localStorage.clear();
+    navigate("/login");
+    return;
+  }
+
+  const fetchUser = async () => {
+    try {
+      const data = await getUser();
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+    } catch (err) {
+      alert(err.message);
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
+
+  fetchUser();
+  }, [])
   return (
     <div className="admin-wrapper">
       {/* SIDEBAR */}
@@ -57,18 +92,18 @@ const AdminLayout = () => {
         <Navbar className="navbar-custom px-4 shadow-sm">
           <Container fluid className="p-0">
             <div className="breadcrumb-wrapper">
-              <span className="text-muted me-2">Pages /</span>
-              <span className="fw-bold text-dark">
-                {menuItems.find(item => location.pathname === item.path)?.title || 'Dashboard'}
-              </span>
+              <Link to="/" className="menu-link">
+            <i className="fa-solid fa-house" aria-hidden="true"></i>
+            <span>Trang chủ</span>
+          </Link>
             </div>
             
             <Navbar.Collapse className="justify-content-end">
               <Dropdown align="end" className="profile-dropdown">
                 <Dropdown.Toggle as="div" className="user-profile-toggle">
                   <div className="user-info d-none d-sm-block">
-                    <span className="user-name">Admin User</span>
-                    <span className="user-role">Administrator</span>
+                    <span className="user-name">{user?.data.username || "trống"}</span>
+                    {/* <span className="user-role">Administrator</span> */}
                   </div>
                   <div className="avatar-wrapper">
                     <Image
@@ -91,7 +126,7 @@ const AdminLayout = () => {
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        
+     ;   
         <section className="admin-page-body">
           <Outlet />
         </section>

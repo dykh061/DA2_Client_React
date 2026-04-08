@@ -7,7 +7,11 @@ const requestJson = async (url, options, fallbackMessage) => {
     const errorMessage = await parseErrorMessage(res, fallbackMessage);
     throw new Error(`${errorMessage} (HTTP ${res.status})`);
   }
-
+  if (res.status === 401 || res.status === 403) {
+    clearAuthData();
+    throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+  }
+  
   if (res.status === 204) return null;
   return res.json();
 };
@@ -24,17 +28,22 @@ const parseErrorMessage = async (res, fallbackMessage) => {
 };
 
 export const register = async (email, password) => {
-  return requestJson(API_ENDPOINTS.AUTH.REGISTER, {
+  const res = await requestJson(API_ENDPOINTS.AUTH.REGISTER, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   }, 'Đăng ký thất bại');
+  return res;
+
 };
 
 export const login = async (email, password) => {
-  return requestJson(API_ENDPOINTS.AUTH.LOGIN, {
+  const res = await requestJson(API_ENDPOINTS.AUTH.LOGIN, {
     method: 'POST', 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   }, 'Đăng nhập thất bại');
+
+  return res;
 }
+

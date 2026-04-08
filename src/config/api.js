@@ -13,11 +13,12 @@ const BASE_URL = import.meta.env.DEV
 
 export const API_ENDPOINTS = {
   USERS: `${BASE_URL}/users`,
-  USER_BY_ID: (id) => `${BASE_URL}/users/${id}`,
+  USER_ME: `${BASE_URL}/users/me`,
   AUTH: {
     REGISTER: `${BASE_URL}/auth/register`,
     LOGIN: `${BASE_URL}/auth/login`
-  }
+  },
+  CREATE_BOOKING: `${BASE_URL}/bookings`,
   
 };
 

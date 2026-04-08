@@ -1,6 +1,86 @@
 import { Link } from 'react-router-dom';
-
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
 function MyBookingsPage() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+      
+  const isTokenExpired = (token) => {
+      if (!token) return true;
+  
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+      } catch {
+        return true;
+      }
+    };
+    useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+  
+    if (!token || isTokenExpired(token)) {
+      localStorage.clear();
+      navigate("/login");
+      return;
+    }
+  
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      } catch (err) {
+        alert(err.message);
+        localStorage.clear();
+        navigate("/login");
+      }
+    };
+  
+    fetchUser();
+    }, [])
+
+   
+   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+  
+    if (!token || token === "null" || token === "undefined") {
+      localStorage.clear();
+      navigate("/login");
+      return;
+    }
+  
+    if (isTokenExpired(token)) {
+      localStorage.clear();
+      navigate("/login");
+      return;
+    }
+
+  
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+       
+        localStorage.setItem("user", JSON.stringify(data));
+      } catch (err) {
+        alert(err.message);
+  
+        localStorage.clear();
+        navigate("/login");
+      }
+    };
+  
+    fetchUser();
+  }, []);
+ const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    setUser(null);
+    navigate("/login");
+  };
+  
+  
   return (
     <div className="booking-screen booking-compact">
       <header className="booking-nav">
@@ -27,12 +107,30 @@ function MyBookingsPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
+          <Link to="/admin/profile" className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </nav>
-
+        
+        {user ? (
+          <div className="menu-link login-link">
+            <i className="fa-regular fa-user"></i>
+            {user?.data.username || "Người dùng"}
+            <button
+              type="button"
+              className="logout-button"
+              onClick={handleLogout}
+            >
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
         <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          <i className="fa-regular fa-user"></i>
           Đăng nhập
         </Link>
+      )}
       </header>
 
       <main className="booking-content">

@@ -13,9 +13,10 @@ function LoginPage() {
     //Chưa có kiểm tra nhập mail, password này kia
     try {
       const data = await login(email, password);
-      localStorage.setItem("accessToken", data.tokens.accessToken);
       alert("Đăng nhập thành công");
-      navigate("/booking");
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/my-bookings");
     } catch (err) {
       alert(err.message);
     }

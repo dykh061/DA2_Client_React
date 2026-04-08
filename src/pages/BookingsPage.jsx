@@ -17,6 +17,15 @@ const BookingsPage = () => {
     { id: 104, name: 'Phạm Thị D', court: 'Sân số 1', time: '17:00 - 19:00', date: '20/03/2026', status: 'Cancelled' },
   ]);
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));  // Lấy user từ localStorage
+    } else {
+        // Nếu không có, có thể gọi getUser() nếu cần
+    }
+  }, []);
+
   const normalizeString = (str) => {
     return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() : '';
   };

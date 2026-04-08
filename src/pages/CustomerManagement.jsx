@@ -4,7 +4,10 @@ import { FaPlus, FaSearch } from 'react-icons/fa'; // Import các icon: Dấu c�
 import UserTable from '../components/CustomerManagementTable.jsx'; // Import component hiển thị bảng danh sách
 import UserForm from '../components/CustomerManagementForm.jsx'; // Import component hiển thị Modal form (thêm/sửa)
 
+
+
 const CustomerManagement = () => {
+  const [user, setUser] = useState(null);
   // --- KHAI BÁO CÁC STATE (TRẠNG THÁI) ---
   const [showModal, setShowModal] = useState(false); // Trạng thái đóng/mở Modal form (true: mở, false: đóng)
   const [editingCustomer, setEditingCustomer] = useState(null); // Lưu dữ liệu người dùng đang được chọn để sửa (null nếu là thêm mới)
@@ -129,7 +132,7 @@ const CustomerManagement = () => {
             </Col>
 
             {/* Dropdown lọc vai trò */}
-            <Col md={3}>
+            {/* <Col md={3}>
               <Form.Select 
                 className="bg-light bg-opacity-50 border-light rounded-3 p-3 shadow-none fw-medium"
                 value={roleFilter}
@@ -139,10 +142,10 @@ const CustomerManagement = () => {
                 <option value="admin">Quản trị viên</option>
                 <option value="staff">Nhân viên</option>
               </Form.Select>
-            </Col>
+            </Col> */}
 
             {/* Dropdown lọc trạng thái */}
-            <Col md={3}>
+            {/* <Col md={3}>
               <Form.Select 
                 className="bg-light bg-opacity-50 border-light rounded-3 p-3 shadow-none fw-medium"
                 value={statusFilter}
@@ -152,7 +155,7 @@ const CustomerManagement = () => {
                 <option value="active">Đang hoạt động</option>
                 <option value="inactive">Tạm khóa</option>
               </Form.Select>
-            </Col>
+            </Col> */}
           </Row>
         </Card.Body>
       </Card>

@@ -1,11 +1,118 @@
-import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Image, Badge, InputGroup } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaShieldAlt, FaPhone, FaCamera, FaKey, FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
+import { updateUser } from '../services/userService.js';
 
 const ProfilePage = () => {
+  const [user, setUser] = useState(null);
+  const token = localStorage.getItem("accessToken");
+  const navigate = useNavigate();
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+  name: "",
+  email: "",
+  phone: "",
+  password: "" 
+});
+
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  };
+
+    
+ 
+ useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token || token === "null" || token === "undefined") {
+    localStorage.clear();
+    navigate("/login");
+    return;
+  }
+
+  if (isTokenExpired(token)) {
+    localStorage.clear();
+    navigate("/login");
+    return;
+  }
+
+  const fetchUser = async () => {
+    try {
+      const data = await getUser();
+      setUser(data);
+      setFormData({
+      name: data.data.username || "",
+      email: data.data.email || "",
+      phone: data.data.phone || data.data.phone_number || "",
+      password: ""
+    });
+      localStorage.setItem("user", JSON.stringify(data));
+    } catch (err) {
+      alert(err.message);
+
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
+
+  fetchUser();
+}, []);
+
+const handleUpdate = async (e) => {
+  e.preventDefault();
+
+  
+  const payload = {
+  name: formData.name,
+  email: formData.email,
+  phone: formData.phone,
+  password: passwordData.newPassword 
+  };
+
+  if (passwordData.newPassword || passwordData.confirmPassword) {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("Mật khẩu xác nhận không khớp");
+      return;
+    }
+  }
+
+  try {
+    const res = await updateUser(payload);
+    if (isTokenExpired(token)) {
+      localStorage.clear();
+      navigate("/login");
+    }
+    localStorage.setItem("user", JSON.stringify(res.data));
+
+    alert("Cập nhật thành công");
+    navigate("/login");
+  } catch (err) {
+    alert(err.message);
+  }
+  
+};
+
+
+
+
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+
+
 
   return (
     <Container fluid className="py-4">
@@ -32,7 +139,9 @@ const ProfilePage = () => {
                 <FaCamera size={14} />
               </Button>
             </div>
-            <h4 className="fw-bold mb-1">Admin User</h4>
+            <h4 className="fw-bold mb-1">
+              {user?.data.username || "Chưa đăng nhập"}
+            </h4>
             <p className="text-muted mb-3 italic">Hệ thống quản lý sân cầu lông</p>
             <div className="d-flex justify-content-center gap-2 mb-4">
               <Badge bg="primary" className="px-3 py-2 rounded-pill fw-medium">Administrator</Badge>
@@ -48,7 +157,7 @@ const ProfilePage = () => {
                 </div>
                 <div>
                   <div className="small text-muted">Email</div>
-                  <div className="fw-medium">admin@caulong.com</div>
+                  <div className="fw-medium">{user?.data.email}</div>
                 </div>
               </div>
               <div className="d-flex align-items-center">
@@ -57,7 +166,7 @@ const ProfilePage = () => {
                 </div>
                 <div>
                   <div className="small text-muted">Số điện thoại</div>
-                  <div className="fw-medium">090 123 4567</div>
+                  <div className="fw-medium">{user?.data.phone_number}</div>
                 </div>
               </div>
             </div>
@@ -76,50 +185,52 @@ const ProfilePage = () => {
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Họ và tên</Form.Label>
-                    <Form.Control type="text" defaultValue="Admin User" className="border-light p-3 rounded-3 shadow-none" />
+                    <Form.Control
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Địa chỉ Email</Form.Label>
-                    <Form.Control type="email" defaultValue="admin@caulong.com" className="border-light p-3 rounded-3 shadow-none" />
-                  </Form.Group>
+                    <Form.Control
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                    />                  </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Số điện thoại</Form.Label>
-                    <Form.Control type="text" defaultValue="090 123 4567" className="border-light p-3 rounded-3 shadow-none" />
-                  </Form.Group>
+                    <Form.Control
+                      type="text"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                    />                  
+                    </Form.Group>
                 </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="small fw-bold text-secondary">Địa chỉ</Form.Label>
-                    <Form.Control type="text" defaultValue="Quận 1, TP.HCM" className="border-light p-3 rounded-3 shadow-none" />
-                  </Form.Group>
-                </Col>
+               
               </Row>
-              <div className="text-end mt-3">
-                <Button variant="primary" className="px-4 py-2 rounded-3 fw-bold shadow-sm">Lưu thay đổi</Button>
-              </div>
-            </Form>
-          </Card>
-
-          <Card className="border-0 shadow-sm p-4 rounded-4">
-            <h5 className="fw-bold mb-4 d-flex align-items-center">
-              <FaKey className="text-warning me-2" /> 
-              Bảo mật tài khoản
-            </h5>
-            <Form>
               <Row className="g-3">
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Mật khẩu cũ</Form.Label>
                     <InputGroup className="rounded-3 overflow-hidden border">
-                      <Form.Control 
-                        type={showOldPassword ? "text" : "password"} 
-                        placeholder="••••••••" 
-                        className="border-0 p-3 shadow-none" 
-                      />
+                     <Form.Control
+                    type={showOldPassword ? "text" : "password"}
+                    value={passwordData.oldPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, oldPassword: e.target.value })
+                    }
+                  />
                       <Button 
                         variant="light" 
                         className="border-0 px-3 bg-white text-muted"
@@ -134,11 +245,13 @@ const ProfilePage = () => {
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Mật khẩu mới</Form.Label>
                     <InputGroup className="rounded-3 overflow-hidden border">
-                      <Form.Control 
-                        type={showNewPassword ? "text" : "password"} 
-                        placeholder="••••••••" 
-                        className="border-0 p-3 shadow-none" 
-                      />
+                     <Form.Control
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                      }
+                    />
                       <Button 
                         variant="light" 
                         className="border-0 px-3 bg-white text-muted"
@@ -153,11 +266,13 @@ const ProfilePage = () => {
                   <Form.Group className="mb-3">
                     <Form.Label className="small fw-bold text-secondary">Xác nhận mật khẩu</Form.Label>
                     <InputGroup className="rounded-3 overflow-hidden border">
-                      <Form.Control 
-                        type={showConfirmPassword ? "text" : "password"} 
-                        placeholder="••••••••" 
-                        className="border-0 p-3 shadow-none" 
-                      />
+                     <Form.Control
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                      }
+                    />
                       <Button 
                         variant="light" 
                         className="border-0 px-3 bg-white text-muted"
@@ -169,11 +284,20 @@ const ProfilePage = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              <div className="text-end mt-2">
-                <Button variant="outline-warning" className="px-4 py-2 rounded-3 fw-bold">Đổi mật khẩu</Button>
-              </div>
+              <div className="text-end mt-3">
+                
+            <Button
+              variant="primary"
+              className="px-4 py-2 rounded-3 fw-bold shadow-sm"
+              onClick={handleUpdate}
+            >
+              Lưu thay đổi
+            </Button>              
+            </div>
             </Form>
           </Card>
+
+          
         </Col>
       </Row>
     </Container>

@@ -1,6 +1,8 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
+import { createBooking } from "../services/bookingService";
 const courts = [
   {
     id: 1,
@@ -23,22 +25,22 @@ const courts = [
 ];
 
 const timeSlots = [
-  { id: 'slot-1', range: '06:00-07:00', period: 'sáng' },
-  { id: 'slot-2', range: '07:00-08:00', period: 'sáng' },
-  { id: 'slot-3', range: '08:00-09:00', period: 'sáng' },
-  { id: 'slot-4', range: '09:00-10:00', period: 'sáng' },
-  { id: 'slot-5', range: '10:00-11:00', period: 'sáng' },
-  { id: 'slot-6', range: '11:00-12:00', period: 'sáng' },
-  { id: 'slot-7', range: '12:00-13:00', period: 'trưa' },
-  { id: 'slot-8', range: '13:00-14:00', period: 'chiều' },
-  { id: 'slot-9', range: '14:00-15:00', period: 'chiều' },
-  { id: 'slot-10', range: '15:00-16:00', period: 'chiều' },
-  { id: 'slot-11', range: '16:00-17:00', period: 'chiều' },
-  { id: 'slot-12', range: '17:00-18:00', period: 'chiều' },
-  { id: 'slot-13', range: '18:00-19:00', period: 'tối' },
-  { id: 'slot-14', range: '19:00-20:00', period: 'tối' },
-  { id: 'slot-15', range: '20:00-21:00', period: 'tối' },
-  { id: 'slot-16', range: '21:00-22:00', period: 'tối' },
+  { id: '1', range: '06:00-07:00', period: 'sáng' },
+  { id: '2', range: '07:00-08:00', period: 'sáng' },
+  { id: '3', range: '08:00-09:00', period: 'sáng' },
+  { id: '4', range: '09:00-10:00', period: 'sáng' },
+  { id: '5', range: '10:00-11:00', period: 'sáng' },
+  { id: '6', range: '11:00-12:00', period: 'sáng' },
+  { id: '7', range: '12:00-13:00', period: 'trưa' },
+  { id: '8', range: '13:00-14:00', period: 'chiều' },
+  { id: '9', range: '14:00-15:00', period: 'chiều' },
+  { id: '10', range: '15:00-16:00', period: 'chiều' },
+  { id: '11', range: '16:00-17:00', period: 'chiều' },
+  { id: '12', range: '17:00-18:00', period: 'chiều' },
+  { id: '13', range: '18:00-19:00', period: 'tối' },
+  { id: '14', range: '19:00-20:00', period: 'tối' },
+  { id: '15', range: '20:00-21:00', period: 'tối' },
+  { id: '16', range: '21:00-22:00', period: 'tối' },
 ];
 
 const courtSlotStatuses = {
@@ -50,6 +52,8 @@ const courtSlotStatuses = {
 const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
 
 function UsersPage() {
+
+
   const [date, setDate] = useState('');
   const [selectedCourtId, setSelectedCourtId] = useState(1);
   const [selectedTimes, setSelectedTimes] = useState([]);
@@ -74,6 +78,88 @@ function UsersPage() {
       return [...previousTimes, slotRange];
     });
   };
+
+
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+  
+    useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+  
+    if (!token || isTokenExpired(token)) {
+      localStorage.clear();
+      navigate("/login");
+      return;
+    }
+  
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      } catch (err) {
+        alert(err.message);
+        localStorage.clear();
+        navigate("/login");
+      }
+    };
+  
+    fetchUser();
+    }, [])
+ const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    setUser(null);
+    navigate("/login");
+  };
+
+  
+  const handleBooking = async () => {
+
+  const today = new Date().toISOString().split("T")[0];
+  if (date < today) {
+    alert("Không thể đặt ngày trong quá khứ");
+    return;
+  }
+
+
+  if (!user?.data.phone_number) {
+    alert("Vui lòng xác nhận số điện thoại");
+    
+    return;
+  }
+
+
+
+const selectedSlotIds = timeSlots
+  .filter(slot => selectedTimes.includes(slot.range))
+  .map(slot => Number(slot.id));
+
+  try {
+    const res = await createBooking({
+      courtId: selectedCourtId,
+      bookingDate: date,
+      timeSlotIds: selectedSlotIds,
+      type: "NORMAL"
+    });
+
+    alert(res.message);
+    navigate("/my-bookings");
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   return (
     <div className="booking-screen booking-compact">
@@ -101,12 +187,32 @@ function UsersPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
+          <Link to="/admin/profile" className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </nav>
 
+      
+        {user ? (
+          <div className="menu-link login-link">
+            <i className="fa-regular fa-user"></i>
+            {user?.data.username || "Người dùng"}
+            <button
+              type="button"
+              className="logout-button"
+              onClick={handleLogout}
+            >
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
         <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          <i className="fa-regular fa-user"></i>
           Đăng nhập
         </Link>
+      )}
+
       </header>
 
       <main className="booking-content">
@@ -265,9 +371,13 @@ function UsersPage() {
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
-          <button type="button" className="confirm-button" disabled={!canConfirm}>
-            Xác nhận đặt sân
-          </button>
+          <button
+          type="button"
+          className="confirm-button"
+          disabled={!canConfirm}
+          onClick={handleBooking}>
+          Xác nhận đặt sân
+        </button>
         </section>
       </main>
     </div>
