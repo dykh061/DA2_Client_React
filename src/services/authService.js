@@ -1,54 +1,40 @@
-import {API_ENDPOINTS} from '../config/api';
+import { API_ENDPOINTS } from "../config/api";
+import { logoutSession, publicRequest } from "./apiClient";
+import { markLoggedIn } from "../utils/auth";
 
-const requestJson = async (url, options, fallbackMessage) => {
-  const res = await fetch(url, options);
+export const register = async (email, password, options = {}) => {
+  const { autoLogin = true } = options;
 
-  
+  const data = await publicRequest(
+    API_ENDPOINTS.AUTH.REGISTER,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    },
+    "Dang ky that bai",
+  );
 
-  if (!res.ok) {
-    const errorMessage = await parseErrorMessage(res, fallbackMessage);
-    throw new Error(`${errorMessage} (HTTP ${res.status})`);
-    if (res.status === 401 || res.status === 403) {
-    localStorage.clear();
-    window.location.href = "/login"; 
+  if (autoLogin) {
+    markLoggedIn(data.accessToken, data.user);
   }
-    
-    
-  }
-  
-  
-  if (res.status === 204) return null;
-  return res.json();
-};
 
-const parseErrorMessage = async (res, fallbackMessage) => {
-  try {
-    const data = await res.json();
-    if (data?.error) return data.error;
-    if (data?.message) return data.message;
-    return fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-};
-
-export const register = async (email, password) => {
-  const res = await requestJson(API_ENDPOINTS.AUTH.REGISTER, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  }, 'Đăng ký thất bại');
-  return res;
-
+  return data;
 };
 
 export const login = async (email, password) => {
-  const res = await requestJson(API_ENDPOINTS.AUTH.LOGIN, {
-    method: 'POST', 
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  }, 'Đăng nhập thất bại');
+  const data = await publicRequest(
+    API_ENDPOINTS.AUTH.LOGIN,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    },
+    "Dang nhap that bai",
+  );
 
-  return res;
-}
+  markLoggedIn(data.accessToken, data.user);
+  return data;
+};
 
+export const logout = logoutSession;

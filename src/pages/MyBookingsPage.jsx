@@ -1,86 +1,36 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../services/userService";
+import { logout } from "../services/authService";
+import { decodeAccessToken, getToken } from "../utils/auth";
 function MyBookingsPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-      
-  const isTokenExpired = (token) => {
-      if (!token) return true;
-  
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.exp * 1000 < Date.now();
-      } catch {
-        return true;
-      }
-    };
-    useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-  
-    if (!token || isTokenExpired(token)) {
-      localStorage.clear();
-      navigate("/login");
-      return;
-    }
-  
+  const currentUser = user?.data ?? user ?? null;
+  const tokenPayload = decodeAccessToken(getToken());
+  const isAdmin = tokenPayload?.role === "admin";
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await getUser();
         setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
       } catch (err) {
         alert(err.message);
-        localStorage.clear();
         navigate("/login");
       }
     };
-  
-    fetchUser();
-    }, [])
 
-   
-   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-  
-    if (!token || token === "null" || token === "undefined") {
-      localStorage.clear();
-      navigate("/login");
-      return;
-    }
-  
-    if (isTokenExpired(token)) {
-      localStorage.clear();
-      navigate("/login");
-      return;
-    }
-
-  
-    const fetchUser = async () => {
-      try {
-        const data = await getUser();
-        setUser(data);
-       
-        localStorage.setItem("user", JSON.stringify(data));
-      } catch (err) {
-        alert(err.message);
-  
-        localStorage.clear();
-        navigate("/login");
-      }
-    };
-  
     fetchUser();
-  }, []);
- const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await logout();
     setUser(null);
     navigate("/login");
   };
-  
-  
+
   return (
     <div className="booking-screen booking-compact">
       <header className="booking-nav">
@@ -107,16 +57,18 @@ function MyBookingsPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
-          <Link to="/admin/profile" className="menu-link">
-            <i className="fa-regular fa-user" aria-hidden="true"></i>
-            <span>Thông tin cá nhân</span>
-          </Link>
+          {isAdmin && (
+            <Link to="/admin/profile" className="menu-link">
+              <i className="fa-regular fa-user" aria-hidden="true"></i>
+              <span>Thông tin cá nhân</span>
+            </Link>
+          )}
         </nav>
-        
+
         {user ? (
           <div className="menu-link login-link">
             <i className="fa-regular fa-user"></i>
-            {user?.data.username || "Người dùng"}
+            {currentUser?.username || "Người dùng"}
             <button
               type="button"
               className="logout-button"
@@ -126,11 +78,11 @@ function MyBookingsPage() {
             </button>
           </div>
         ) : (
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user"></i>
-          Đăng nhập
-        </Link>
-      )}
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <main className="booking-content">
@@ -145,7 +97,9 @@ function MyBookingsPage() {
           </div>
           <h2>Chưa có lịch đặt sân</h2>
           <p>Bạn chưa có lịch đặt sân nào. Hãy đặt sân ngay!</p>
-          <Link to="/booking" className="btn-booking-cta">Đặt sân ngay</Link>
+          <Link to="/booking" className="btn-booking-cta">
+            Đặt sân ngay
+          </Link>
         </section>
       </main>
     </div>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +10,8 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const isStrongPassword = (password) => {
-  const regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     return regex.test(password);
   };
   const handleRegister = async (e) => {
@@ -19,7 +19,9 @@ function RegisterPage() {
     //Chưa có giao diện báo lỗi
     //Chưa có kiểm tra nhập mail, name này kia
     if (!isStrongPassword(password)) {
-      alert("Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+      alert(
+        "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+      );
       return;
     }
 
@@ -28,9 +30,8 @@ function RegisterPage() {
       return;
     }
     try {
-      const data = await register(email, password);
+      await register(email, password);
       alert("Đăng ký thành công");
-      localStorage.setItem("accessToken", data.accessToken);
       navigate("/my-bookings");
     } catch (err) {
       alert(err.message);
@@ -65,12 +66,10 @@ function RegisterPage() {
           </Link>
         </nav>
 
-        
         <Link className="menu-link login-link" to="/login">
           <i className="fa-regular fa-user"></i>
           Đăng nhập
         </Link>
-      
       </header>
 
       <main className="login-wrapper">
@@ -87,24 +86,41 @@ function RegisterPage() {
             <input id="fullName" type="text" placeholder="Nguyễn Văn A" />
 
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" required 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}/>
+            <input
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
             <label htmlFor="phone">Số điện thoại</label>
             <input id="phone" type="tel" placeholder="0912345678" required />
 
             <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}/>
+            <input
+              id="password"
+              type="password"
+              placeholder="........"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
             <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-            <input id="confirmPassword" type="password" placeholder="........" 
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}/>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="........"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-            <button type="button" className="login-submit-btn" onClick={handleRegister}>
+            <button
+              type="button"
+              className="login-submit-btn"
+              onClick={handleRegister}
+            >
               Đăng ký
             </button>
           </form>

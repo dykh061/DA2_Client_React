@@ -1,52 +1,33 @@
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const homeCourts = [
   {
     id: 1,
-    name: 'Sân 1',
-    price: '50.000đ/giờ',
-    description: 'Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng',
+    name: "Sân 1",
+    price: "50.000đ/giờ",
+    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
     image:
-'https://qvbadminton.com/wp-content/uploads/2024/11/alt-text-mo-ta-hinh-anh-san-cau-long-dong-phuong-quan-2-rong-rai-thoang-mat-d9639f6a.webp'  },
+      "https://qvbadminton.com/wp-content/uploads/2024/11/alt-text-mo-ta-hinh-anh-san-cau-long-dong-phuong-quan-2-rong-rai-thoang-mat-d9639f6a.webp",
+  },
   {
     id: 2,
-    name: 'Sân 2',
-    price: '50.000đ/giờ',
-    description: 'Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng',
+    name: "Sân 2",
+    price: "50.000đ/giờ",
+    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
     image:
-      'https://tuanvisport.com.vn/wp-content/uploads/2024/02/Thi-cong-san-cau-long.jpg',
+      "https://tuanvisport.com.vn/wp-content/uploads/2024/02/Thi-cong-san-cau-long.jpg",
   },
   {
     id: 3,
-    name: 'Sân 3',
-    price: '50.000đ/giờ',
-    description: 'Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng',
-    image:'https://babolat.com.vn/wp-content/uploads/2023/11/san-danh-cau-long-binh-trieu.jpg'
+    name: "Sân 3",
+    price: "50.000đ/giờ",
+    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
+    image:
+      "https://babolat.com.vn/wp-content/uploads/2023/11/san-danh-cau-long-binh-trieu.jpg",
   },
 ];
 
- 
 function HomePage() {
-   const isTokenExpired = (token) => {
-    if (!token) return true;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
-  };
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token || isTokenExpired(token)) {
-      localStorage.clear();
-    }
-    if (!token || isTokenExpired(token)) {
-      localStorage.clear();
-}
-  }, []);
   return (
     <div className="home-screen">
       <header className="booking-nav home-nav">
@@ -74,8 +55,6 @@ function HomePage() {
             <span>Lịch của tôi</span>
           </Link>
         </nav>
-
-        
       </header>
 
       <section className="home-hero">
@@ -90,11 +69,13 @@ function HomePage() {
             tiện lợi
           </h1>
           <p>
-            Hệ thống sân cầu lông chuyên nghiệp với thiết bị hiện đại, phục vụ 24/7 cho mọi nhu cầu của bạn.
+            Hệ thống sân cầu lông chuyên nghiệp với thiết bị hiện đại, phục vụ
+            24/7 cho mọi nhu cầu của bạn.
           </p>
           <div className="home-hero-actions">
             <Link to="/booking" className="home-btn-primary">
-              Đặt sân ngay <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              Đặt sân ngay{" "}
+              <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </Link>
             <a href="#" className="home-btn-secondary">
               Xem lịch đặt
@@ -131,7 +112,8 @@ function HomePage() {
         <h2>Sẵn sàng chơi cầu lông?</h2>
         <p>Đặt sân ngay hôm nay và tận hưởng trải nghiệm tuyệt vời</p>
         <Link to="/booking" className="home-btn-primary cta-btn">
-          Đặt sân ngay <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          Đặt sân ngay{" "}
+          <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </Link>
       </section>
     </div>

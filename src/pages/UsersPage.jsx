@@ -1,74 +1,134 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../services/userService";
 import { createBooking } from "../services/bookingService";
+import { logout } from "../services/authService";
+import { decodeAccessToken, getToken } from "../utils/auth";
 const courts = [
   {
     id: 1,
-    name: 'Sân 1',
-    type: 'Sân tiêu chuẩn',
+    name: "Sân 1",
+    type: "Sân tiêu chuẩn",
     price: 50000,
   },
   {
     id: 2,
-    name: 'Sân 2',
-    type: 'Sân tiêu chuẩn',
+    name: "Sân 2",
+    type: "Sân tiêu chuẩn",
     price: 50000,
   },
   {
     id: 3,
-    name: 'Sân 3',
-    type: 'Sân tiêu chuẩn',
+    name: "Sân 3",
+    type: "Sân tiêu chuẩn",
     price: 50000,
   },
 ];
 
 const timeSlots = [
-  { id: '1', range: '06:00-07:00', period: 'sáng' },
-  { id: '2', range: '07:00-08:00', period: 'sáng' },
-  { id: '3', range: '08:00-09:00', period: 'sáng' },
-  { id: '4', range: '09:00-10:00', period: 'sáng' },
-  { id: '5', range: '10:00-11:00', period: 'sáng' },
-  { id: '6', range: '11:00-12:00', period: 'sáng' },
-  { id: '7', range: '12:00-13:00', period: 'trưa' },
-  { id: '8', range: '13:00-14:00', period: 'chiều' },
-  { id: '9', range: '14:00-15:00', period: 'chiều' },
-  { id: '10', range: '15:00-16:00', period: 'chiều' },
-  { id: '11', range: '16:00-17:00', period: 'chiều' },
-  { id: '12', range: '17:00-18:00', period: 'chiều' },
-  { id: '13', range: '18:00-19:00', period: 'tối' },
-  { id: '14', range: '19:00-20:00', period: 'tối' },
-  { id: '15', range: '20:00-21:00', period: 'tối' },
-  { id: '16', range: '21:00-22:00', period: 'tối' },
+  { id: "1", range: "06:00-07:00", period: "sáng" },
+  { id: "2", range: "07:00-08:00", period: "sáng" },
+  { id: "3", range: "08:00-09:00", period: "sáng" },
+  { id: "4", range: "09:00-10:00", period: "sáng" },
+  { id: "5", range: "10:00-11:00", period: "sáng" },
+  { id: "6", range: "11:00-12:00", period: "sáng" },
+  { id: "7", range: "12:00-13:00", period: "trưa" },
+  { id: "8", range: "13:00-14:00", period: "chiều" },
+  { id: "9", range: "14:00-15:00", period: "chiều" },
+  { id: "10", range: "15:00-16:00", period: "chiều" },
+  { id: "11", range: "16:00-17:00", period: "chiều" },
+  { id: "12", range: "17:00-18:00", period: "chiều" },
+  { id: "13", range: "18:00-19:00", period: "tối" },
+  { id: "14", range: "19:00-20:00", period: "tối" },
+  { id: "15", range: "20:00-21:00", period: "tối" },
+  { id: "16", range: "21:00-22:00", period: "tối" },
 ];
 
 const courtSlotStatuses = {
-  1: ['available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'available', 'booked', 'booked', 'available', 'available', 'booked'],
-  2: ['booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'available', 'booked', 'available'],
-  3: ['available', 'booked', 'available', 'available', 'available', 'booked', 'available', 'booked', 'available', 'available', 'booked', 'booked', 'booked', 'available', 'available', 'available'],
+  1: [
+    "available",
+    "available",
+    "booked",
+    "available",
+    "available",
+    "available",
+    "booked",
+    "available",
+    "available",
+    "booked",
+    "available",
+    "booked",
+    "booked",
+    "available",
+    "available",
+    "booked",
+  ],
+  2: [
+    "booked",
+    "available",
+    "available",
+    "available",
+    "booked",
+    "available",
+    "available",
+    "available",
+    "booked",
+    "available",
+    "available",
+    "booked",
+    "booked",
+    "available",
+    "booked",
+    "available",
+  ],
+  3: [
+    "available",
+    "booked",
+    "available",
+    "available",
+    "available",
+    "booked",
+    "available",
+    "booked",
+    "available",
+    "available",
+    "booked",
+    "booked",
+    "booked",
+    "available",
+    "available",
+    "available",
+  ],
 };
 
-const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
+const formatCurrency = (amount) => `${amount.toLocaleString("vi-VN")}đ`;
 
 function UsersPage() {
-
-
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState("");
   const [selectedCourtId, setSelectedCourtId] = useState(1);
   const [selectedTimes, setSelectedTimes] = useState([]);
-  const [customerName, setCustomerName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [customerName, setCustomerName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
-  const selectedCourt = courts.find((court) => court.id === selectedCourtId) || null;
-  const totalAmount = selectedCourt ? selectedCourt.price * selectedTimes.length : 0;
+  const selectedCourt =
+    courts.find((court) => court.id === selectedCourtId) || null;
+  const totalAmount = selectedCourt
+    ? selectedCourt.price * selectedTimes.length
+    : 0;
 
-  const canConfirm = Boolean(date && selectedCourt && selectedTimes.length > 0 && customerName.trim() && phoneNumber.trim());
+  const canConfirm = Boolean(
+    date &&
+    selectedCourt &&
+    selectedTimes.length > 0 &&
+    customerName.trim() &&
+    phoneNumber.trim(),
+  );
 
   const activeSlotStatuses = courtSlotStatuses[selectedCourtId] || [];
 
   const handleToggleTimeSlot = (slotRange, slotStatus) => {
-    if (slotStatus !== 'available') return;
+    if (slotStatus !== "available") return;
 
     setSelectedTimes((previousTimes) => {
       if (previousTimes.includes(slotRange)) {
@@ -79,87 +139,62 @@ function UsersPage() {
     });
   };
 
-
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const isTokenExpired = (token) => {
-  if (!token) return true;
+  const currentUser = user?.data ?? user ?? null;
+  const tokenPayload = decodeAccessToken(getToken());
+  const isAdmin = tokenPayload?.role === "admin";
 
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp * 1000 < Date.now();
-  } catch {
-    return true;
-  }
-};
-  
-    useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-  
-    if (!token || isTokenExpired(token)) {
-      localStorage.clear();
-      navigate("/login");
-      return;
-    }
-  
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await getUser();
         setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
       } catch (err) {
         alert(err.message);
-        localStorage.clear();
         navigate("/login");
       }
     };
-  
+
     fetchUser();
-    }, [])
- const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
+  }, [navigate]);
+  const handleLogout = async () => {
+    await logout();
     setUser(null);
     navigate("/login");
   };
 
-  
   const handleBooking = async () => {
+    const today = new Date().toISOString().split("T")[0];
+    if (date < today) {
+      alert("Không thể đặt ngày trong quá khứ");
+      return;
+    }
 
-  const today = new Date().toISOString().split("T")[0];
-  if (date < today) {
-    alert("Không thể đặt ngày trong quá khứ");
-    return;
-  }
+    if (!currentUser?.phone_number) {
+      alert("Vui lòng xác nhận số điện thoại");
 
+      return;
+    }
 
-  if (!user?.data.phone_number) {
-    alert("Vui lòng xác nhận số điện thoại");
-    
-    return;
-  }
+    const selectedSlotIds = timeSlots
+      .filter((slot) => selectedTimes.includes(slot.range))
+      .map((slot) => Number(slot.id));
 
+    try {
+      const res = await createBooking({
+        courtId: selectedCourtId,
+        bookingDate: date,
+        timeSlotIds: selectedSlotIds,
+        type: "NORMAL",
+      });
 
-
-const selectedSlotIds = timeSlots
-  .filter(slot => selectedTimes.includes(slot.range))
-  .map(slot => Number(slot.id));
-
-  try {
-    const res = await createBooking({
-      courtId: selectedCourtId,
-      bookingDate: date,
-      timeSlotIds: selectedSlotIds,
-      type: "NORMAL"
-    });
-
-    alert(res.message);
-    navigate("/my-bookings");
-
-  } catch (err) {
-    alert(err.message);
-  }
-};
+      alert(res.message);
+      navigate("/my-bookings");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="booking-screen booking-compact">
@@ -187,17 +222,18 @@ const selectedSlotIds = timeSlots
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
-          <Link to="/admin/profile" className="menu-link">
-            <i className="fa-regular fa-user" aria-hidden="true"></i>
-            <span>Thông tin cá nhân</span>
-          </Link>
+          {isAdmin && (
+            <Link to="/admin/profile" className="menu-link">
+              <i className="fa-regular fa-user" aria-hidden="true"></i>
+              <span>Thông tin cá nhân</span>
+            </Link>
+          )}
         </nav>
 
-      
         {user ? (
           <div className="menu-link login-link">
             <i className="fa-regular fa-user"></i>
-            {user?.data.username || "Người dùng"}
+            {currentUser?.username || "Người dùng"}
             <button
               type="button"
               className="logout-button"
@@ -207,12 +243,11 @@ const selectedSlotIds = timeSlots
             </button>
           </div>
         ) : (
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user"></i>
-          Đăng nhập
-        </Link>
-      )}
-
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <main className="booking-content">
@@ -249,7 +284,7 @@ const selectedSlotIds = timeSlots
               <button
                 type="button"
                 key={court.id}
-                className={`court-item ${selectedCourtId === court.id ? 'selected' : ''}`}
+                className={`court-item ${selectedCourtId === court.id ? "selected" : ""}`}
                 onClick={() => {
                   setSelectedCourtId(court.id);
                   setSelectedTimes([]);
@@ -269,7 +304,10 @@ const selectedSlotIds = timeSlots
             Chọn giờ
           </h2>
 
-          <div className="slot-status-legend" aria-label="Chú thích trạng thái sân">
+          <div
+            className="slot-status-legend"
+            aria-label="Chú thích trạng thái sân"
+          >
             <span>
               <i className="legend-dot available" aria-hidden="true"></i>
               Trống
@@ -288,27 +326,40 @@ const selectedSlotIds = timeSlots
             <div className="time-table">
               <div className="time-cell heading cell-court">Khung giờ</div>
               {timeSlots.map((slot) => (
-                <div key={`${slot.id}-heading`} className="time-cell heading cell-slot">
+                <div
+                  key={`${slot.id}-heading`}
+                  className="time-cell heading cell-slot"
+                >
                   <span>{slot.range}</span>
                   <small>{slot.period}</small>
                 </div>
               ))}
 
-              <div className="time-cell court-name">{selectedCourt?.name || 'Sân 1'}</div>
+              <div className="time-cell court-name">
+                {selectedCourt?.name || "Sân 1"}
+              </div>
               {timeSlots.map((slot, index) => {
-                const slotStatus = activeSlotStatuses[index] || 'booked';
+                const slotStatus = activeSlotStatuses[index] || "booked";
                 const isSelected = selectedTimes.includes(slot.range);
 
                 return (
                   <button
                     type="button"
                     key={slot.id}
-                    className={`time-cell slot-btn ${slotStatus} ${isSelected ? 'selected' : ''}`}
+                    className={`time-cell slot-btn ${slotStatus} ${isSelected ? "selected" : ""}`}
                     onClick={() => handleToggleTimeSlot(slot.range, slotStatus)}
-                    disabled={slotStatus !== 'available'}
-                    title={slotStatus === 'booked' ? 'Khung giờ đã được đặt' : `Chọn ${slot.range}`}
+                    disabled={slotStatus !== "available"}
+                    title={
+                      slotStatus === "booked"
+                        ? "Khung giờ đã được đặt"
+                        : `Chọn ${slot.range}`
+                    }
                   >
-                    {isSelected ? 'Đang chọn' : slotStatus === 'available' ? 'Trống' : 'Đã đặt'}
+                    {isSelected
+                      ? "Đang chọn"
+                      : slotStatus === "available"
+                        ? "Trống"
+                        : "Đã đặt"}
                   </button>
                 );
               })}
@@ -341,28 +392,34 @@ const selectedSlotIds = timeSlots
 
         <section className="booking-card summary-card">
           <h2>Tóm tắt đặt sân</h2>
-          <p className="summary-subtitle">Kiểm tra thông tin trước khi xác nhận</p>
+          <p className="summary-subtitle">
+            Kiểm tra thông tin trước khi xác nhận
+          </p>
 
           <dl>
             <div>
               <dt>Ngày</dt>
-              <dd>{date || 'Chưa chọn'}</dd>
+              <dd>{date || "Chưa chọn"}</dd>
             </div>
             <div>
               <dt>Sân</dt>
-              <dd>{selectedCourt?.name || 'Chưa chọn'}</dd>
+              <dd>{selectedCourt?.name || "Chưa chọn"}</dd>
             </div>
             <div>
               <dt>Giờ</dt>
-              <dd>{selectedTimes.length > 0 ? selectedTimes.join(', ') : 'Chưa chọn'}</dd>
+              <dd>
+                {selectedTimes.length > 0
+                  ? selectedTimes.join(", ")
+                  : "Chưa chọn"}
+              </dd>
             </div>
             <div>
               <dt>Khách hàng</dt>
-              <dd>{customerName.trim() || 'Chưa nhập'}</dd>
+              <dd>{customerName.trim() || "Chưa nhập"}</dd>
             </div>
             <div>
               <dt>Số điện thoại</dt>
-              <dd>{phoneNumber.trim() || 'Chưa nhập'}</dd>
+              <dd>{phoneNumber.trim() || "Chưa nhập"}</dd>
             </div>
           </dl>
 
@@ -372,12 +429,13 @@ const selectedSlotIds = timeSlots
           </div>
 
           <button
-          type="button"
-          className="confirm-button"
-          disabled={!canConfirm}
-          onClick={handleBooking}>
-          Xác nhận đặt sân
-        </button>
+            type="button"
+            className="confirm-button"
+            disabled={!canConfirm}
+            onClick={handleBooking}
+          >
+            Xác nhận đặt sân
+          </button>
         </section>
       </main>
     </div>

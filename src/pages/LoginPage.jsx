@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../services/authService";
 import { useNavigate } from "react-router-dom";
@@ -12,10 +12,8 @@ function LoginPage() {
     //Chưa có giao diện báo lỗi
     //Chưa có kiểm tra nhập mail, password này kia
     try {
-      const data = await login(email, password);
+      await login(email, password);
       alert("Đăng nhập thành công");
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/my-bookings");
     } catch (err) {
       alert(err.message);
@@ -67,16 +65,29 @@ function LoginPage() {
 
           <form className="login-form">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" required 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}/>
+            <input
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
             <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}/>
+            <input
+              id="password"
+              type="password"
+              placeholder="........"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-            <button type="button" className="login-submit-btn" onClick={handleLogin}>
+            <button
+              type="button"
+              className="login-submit-btn"
+              onClick={handleLogin}
+            >
               Đăng nhập
             </button>
           </form>
