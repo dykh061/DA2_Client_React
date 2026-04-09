@@ -81,10 +81,7 @@ function RegisterPage() {
           <h1>Đăng ký</h1>
           <p>Tạo tài khoản mới để đặt sân</p>
 
-          <form className="login-form">
-            <label htmlFor="fullName">Họ và tên</label>
-            <input id="fullName" type="text" placeholder="Nguyễn Văn A" />
-
+          <form className="login-form" onSubmit={handleRegister}>
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -95,14 +92,12 @@ function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <label htmlFor="phone">Số điện thoại</label>
-            <input id="phone" type="tel" placeholder="0912345678" required />
-
             <label htmlFor="password">Mật khẩu</label>
             <input
               id="password"
               type="password"
               placeholder="........"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -112,15 +107,12 @@ function RegisterPage() {
               id="confirmPassword"
               type="password"
               placeholder="........"
+              required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
 
-            <button
-              type="button"
-              className="login-submit-btn"
-              onClick={handleRegister}
-            >
+            <button type="submit" className="login-submit-btn">
               Đăng ký
             </button>
           </form>
