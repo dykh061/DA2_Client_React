@@ -1,6 +1,88 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  clearAuthSession,
+  extractAccessToken,
+  getDisplayName,
+  getCurrentUser,
+  getMyProfile,
+  login,
+  saveAccessToken,
+  saveCurrentUser,
+} from '../services/authService';
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const currentUser = getCurrentUser();
+  const greetingName = getDisplayName(currentUser);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    navigate('/', { replace: true });
+  };
+
+  const handleChange = (event) => {
+    const { id, value } = event.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    const email = formData.email.trim();
+    const password = formData.password;
+
+    if (!email || !password) {
+      setErrorMessage('Vui lòng nhập email và mật khẩu.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await login({ email, password });
+      const accessToken = extractAccessToken(response);
+
+      if (!accessToken) {
+        throw new Error('Đăng nhập thành công nhưng backend chưa trả access token đúng format.');
+      }
+
+      saveAccessToken(accessToken);
+
+      const fallbackUser = response?.user || response?.data?.user || null;
+      if (fallbackUser) {
+        saveCurrentUser(fallbackUser);
+      }
+
+      try {
+        const profileResponse = await getMyProfile();
+        const profileData = profileResponse?.data || profileResponse?.user || null;
+        if (profileData) {
+          saveCurrentUser(profileData);
+        }
+      } catch {
+        // Profile fetch can fail independently; login token is still valid.
+      }
+
+      setSuccessMessage('Đăng nhập thành công. Đang chuyển hướng...');
+      setTimeout(() => {
+        navigate('/my-bookings', { replace: true });
+      }, 900);
+    } catch (error) {
+      setErrorMessage(error.message || 'Không thể đăng nhập. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="login-screen">
       <header className="booking-nav home-nav">
@@ -29,10 +111,22 @@ function LoginPage() {
           </Link>
         </nav>
 
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
-          Đăng nhập
-        </Link>
+        {currentUser ? (
+          <div className="auth-actions">
+            <Link className="menu-link login-link" to="/my-bookings">
+              <i className="fa-regular fa-user" aria-hidden="true"></i>
+              {`Xin chào ${greetingName}`}
+            </Link>
+            <button type="button" className="menu-link logout-btn" onClick={handleLogout}>
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <main className="login-wrapper">
@@ -44,15 +138,32 @@ function LoginPage() {
           <h1>Đăng nhập</h1>
           <p>Đăng nhập để tiếp tục đặt sân</p>
 
-          <form className="login-form">
+          <form className="login-form" onSubmit={handleSubmit}>
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" required />
+            <input
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+              value={formData.email}
+              onChange={handleChange}
+            />
 
             <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" />
+            <input
+              id="password"
+              type="password"
+              placeholder="........"
+              required
+              value={formData.password}
+              onChange={handleChange}
+            />
 
-            <button type="button" className="login-submit-btn">
-              Đăng nhập
+            {errorMessage && <p className="form-feedback form-feedback-error">{errorMessage}</p>}
+            {successMessage && <p className="form-feedback form-feedback-success">{successMessage}</p>}
+
+            <button type="submit" className="login-submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 

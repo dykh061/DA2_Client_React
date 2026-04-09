@@ -4,15 +4,52 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import MyBookingsPage from './pages/MyBookingsPage';
+import { getAccessToken } from './services/authService';
+
+function RequireAuth({ children }) {
+  return getAccessToken() ? children : <Navigate to="/login" replace />;
+}
+
+function RequireGuest({ children }) {
+  return getAccessToken() ? <Navigate to="/my-bookings" replace /> : children;
+}
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/booking" element={<UsersPage />} />
-      <Route path="/my-bookings" element={<MyBookingsPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/booking"
+        element={
+          <RequireAuth>
+            <UsersPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/my-bookings"
+        element={
+          <RequireAuth>
+            <MyBookingsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <RequireGuest>
+            <LoginPage />
+          </RequireGuest>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <RequireGuest>
+            <RegisterPage />
+          </RequireGuest>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

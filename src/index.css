@@ -271,6 +271,31 @@ body {
   cursor: pointer;
 }
 
+.login-submit-btn:disabled {
+  background: var(--brand-soft);
+  cursor: not-allowed;
+}
+
+.form-feedback {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.form-feedback-error {
+  color: #912f2f;
+  background: #ffe7e7;
+  border: 1px solid #f3b4b4;
+}
+
+.form-feedback-success {
+  color: #0d6c3d;
+  background: #e5f8ee;
+  border: 1px solid #a9e1c4;
+}
+
 .login-signup {
   margin: 18px 0 0;
   text-align: center;
@@ -377,6 +402,24 @@ body {
 .menu-link.login-link {
   background: var(--brand);
   color: #ffffff;
+}
+
+.auth-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-link.logout-btn {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--text-900);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.menu-link.logout-btn:hover {
+  background: #f4fbf7;
 }
 
 .booking-content {
@@ -741,6 +784,30 @@ body {
   background: #06a64f;
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(2, 169, 82, 0.2);
+}
+
+.admin-users-list {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.admin-user-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.admin-user-item strong {
+  display: block;
+  font-size: 1.2rem;
+}
+
+.admin-user-item p {
+  margin: 6px 0 0;
+  color: var(--text-600);
 }
 
 .confirm-button,

@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '../config/api';
+import { getAuthHeaders } from './authService';
 
 const parseErrorMessage = async (res, fallbackMessage) => {
   try {
@@ -23,32 +24,59 @@ const requestJson = async (url, options, fallbackMessage) => {
   return res.json();
 };
 
-export const getUsers = async () => {
-  return requestJson(API_ENDPOINTS.USERS, { method: 'GET' }, 'Lỗi khi tải danh sách người dùng');
+export const getMyProfile = async () => {
+  return requestJson(
+    API_ENDPOINTS.USER_ME,
+    {
+      method: 'GET',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    },
+    'Không thể lấy thông tin cá nhân'
+  );
 };
 
-export const getUserById = async (id) => {
-  return requestJson(API_ENDPOINTS.USER_BY_ID(id), { method: 'GET' }, 'Lỗi khi tải người dùng theo ID');
+export const updateMyProfile = async ({ username, email, password, phone_number }) => {
+  const payload = {
+    phone_number,
+  };
+
+  if (username?.trim()) {
+    payload.username = username;
+  }
+
+  if (email?.trim()) {
+    payload.email = email;
+  }
+
+  if (password?.trim()) {
+    payload.password = password;
+  }
+
+  return requestJson(
+    API_ENDPOINTS.USER_ME,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(payload),
+    },
+    'Không thể cập nhật thông tin người dùng'
+  );
 };
 
-export const createUser = async (name) => {
-  return requestJson(API_ENDPOINTS.USERS, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  }, 'Lỗi khi tạo người dùng');
-};
-
-export const updateUser = async (id, name) => {
-  return requestJson(API_ENDPOINTS.USER_BY_ID(id), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  }, 'Lỗi khi cập nhật người dùng');
-};
-
-export const deleteUser = async (id) => {
-  return requestJson(API_ENDPOINTS.USER_BY_ID(id), {
-    method: 'DELETE',
-  }, 'Lỗi khi xóa người dùng');
+export const getAllUsersForAdmin = async () => {
+  return requestJson(
+    API_ENDPOINTS.USERS_ALL,
+    {
+      method: 'GET',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    },
+    'Không thể tải danh sách người dùng'
+  );
 };
