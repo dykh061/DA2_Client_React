@@ -10,6 +10,7 @@ function MyBookingsPage() {
   const currentUser = user?.data ?? user ?? null;
   const tokenPayload = decodeAccessToken(getToken());
   const isAdmin = tokenPayload?.role === "admin";
+  const profilePath = isAdmin ? "/admin/profile" : "/profile-user";
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,12 +58,10 @@ function MyBookingsPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
-          {isAdmin && (
-            <Link to="/admin/profile" className="menu-link">
-              <i className="fa-regular fa-user" aria-hidden="true"></i>
-              <span>Thông tin cá nhân</span>
-            </Link>
-          )}
+          <Link to={profilePath} className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </nav>
 
         {user ? (

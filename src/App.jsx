@@ -12,6 +12,7 @@ import CustomerManagement from "./pages/CustomerManagement";
 import HistoryPage from "./pages/HistoryPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { restoreSession } from "./services/apiClient";
@@ -71,6 +72,18 @@ function App() {
             <MyBookingsPage />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/profile-user"
+        element={
+          <ProtectedRoute>
+            <UserProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={<Navigate to="/profile-user" replace />}
       />
       <Route
         path="/login"

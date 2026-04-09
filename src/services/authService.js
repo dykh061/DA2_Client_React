@@ -2,6 +2,20 @@ import { API_ENDPOINTS } from "../config/api";
 import { logoutSession, publicRequest } from "./apiClient";
 import { markLoggedIn } from "../utils/auth";
 
+const extractAccessToken = (data) =>
+  data?.accessToken || data?.tokens?.accessToken || null;
+
+const extractAuthPayload = (data) => {
+  const accessToken = extractAccessToken(data);
+  const user = data?.user || null;
+
+  if (!accessToken) {
+    throw new Error("API auth khong tra ve accessToken");
+  }
+
+  return { accessToken, user };
+};
+
 export const register = async (email, password, options = {}) => {
   const { autoLogin = true } = options;
 
@@ -16,7 +30,8 @@ export const register = async (email, password, options = {}) => {
   );
 
   if (autoLogin) {
-    markLoggedIn(data.accessToken, data.user);
+    const { accessToken, user } = extractAuthPayload(data);
+    markLoggedIn(accessToken, user);
   }
 
   return data;
@@ -33,7 +48,8 @@ export const login = async (email, password) => {
     "Dang nhap that bai",
   );
 
-  markLoggedIn(data.accessToken, data.user);
+  const { accessToken, user } = extractAuthPayload(data);
+  markLoggedIn(accessToken, user);
   return data;
 };
 

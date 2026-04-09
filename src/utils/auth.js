@@ -1,7 +1,22 @@
 const ACCESS_TOKEN_KEY = "accessToken";
 const USER_KEY = "user";
+const EXTRA_TOKEN_KEYS = ["token", "authToken", "refreshToken"];
+const EXTRA_USER_KEYS = ["currentUser", "userData", "profile"];
+const COOKIE_NAMES = ["refreshToken", "accessToken", "token"];
 
 export const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
+
+const normalizeToken = (token) => {
+  if (!token || typeof token !== "string") return null;
+  const trimmed = token.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.toLowerCase().startsWith("bearer ")) {
+    return trimmed.slice(7).trim() || null;
+  }
+
+  return trimmed;
+};
 
 export const decodeAccessToken = (token = getToken()) => {
   if (!token || typeof token !== "string") return null;
@@ -22,12 +37,14 @@ export const decodeAccessToken = (token = getToken()) => {
 };
 
 export const setToken = (token) => {
-  if (!token) {
+  const normalizedToken = normalizeToken(token);
+
+  if (!normalizedToken) {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     return;
   }
 
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.setItem(ACCESS_TOKEN_KEY, normalizedToken);
 };
 
 export const getUser = () => {
@@ -54,6 +71,21 @@ export const setUser = (user) => {
 export const clearSession = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+
+  EXTRA_TOKEN_KEYS.forEach((key) => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  });
+
+  EXTRA_USER_KEYS.forEach((key) => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  });
+
+  COOKIE_NAMES.forEach((cookieName) => {
+    document.cookie = `${cookieName}=; Max-Age=0; path=/`;
+  });
+
   window.dispatchEvent(new Event("auth:logout"));
 };
 
