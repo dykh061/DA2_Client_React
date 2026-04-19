@@ -1,6 +1,43 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { register } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 function RegisterPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const isStrongPassword = (password) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    return regex.test(password);
+  };
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    //Chưa có giao diện báo lỗi
+    //Chưa có kiểm tra nhập mail, name này kia
+    if (!isStrongPassword(password)) {
+      alert(
+        "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Mật khẩu không khớp");
+      return;
+    }
+    try {
+      await register(email, password);
+      alert("Đăng ký thành công");
+      navigate("/my-bookings");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   return (
     <div className="login-screen">
       <header className="booking-nav home-nav">
@@ -30,7 +67,7 @@ function RegisterPage() {
         </nav>
 
         <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
+          <i className="fa-regular fa-user"></i>
           Đăng nhập
         </Link>
       </header>
@@ -44,23 +81,38 @@ function RegisterPage() {
           <h1>Đăng ký</h1>
           <p>Tạo tài khoản mới để đặt sân</p>
 
-          <form className="login-form">
-            <label htmlFor="fullName">Họ và tên</label>
-            <input id="fullName" type="text" placeholder="Nguyễn Văn A" />
-
+          <form className="login-form" onSubmit={handleRegister}>
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="example@email.com" required />
-
-            <label htmlFor="phone">Số điện thoại</label>
-            <input id="phone" type="tel" placeholder="0912345678" required />
+            <input
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
             <label htmlFor="password">Mật khẩu</label>
-            <input id="password" type="password" placeholder="........" />
+            <input
+              id="password"
+              type="password"
+              placeholder="........"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
             <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-            <input id="confirmPassword" type="password" placeholder="........" />
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="........"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-            <button type="button" className="login-submit-btn">
+            <button type="submit" className="login-submit-btn">
               Đăng ký
             </button>
           </form>

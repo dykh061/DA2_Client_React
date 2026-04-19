@@ -4,6 +4,7 @@ import { Table, Button } from "react-bootstrap";
 const CustomerManagementTable = ({ customers = [], onEdit, onDelete }) => {
   return (
 
+
     <Table responsive hover className="align-middle mb-0">
       <thead className="bg-light">
         <tr>

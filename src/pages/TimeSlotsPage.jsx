@@ -1,12 +1,14 @@
-// Quản lý Sân
+// QUẢN LÝ KHUNG GIỜ (TIME SLOTS)
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import React, { useState, useEffect } from "react";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
-import CourtTable from "../components/CourtTable.jsx";
-import CourtForm from "../components/CourtForm.jsx";
 
-const CourtsPage = () => {
+import TimeSlotTable from "../components/TimeSlotTable.jsx";
+import TimeSlotModal from "../components/TimeSlotModal.jsx";
+
+const TimeSlotsPage = () => {
+  // ================= STATE =================
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -14,23 +16,20 @@ const CourtsPage = () => {
   const [editingItem, setEditingItem] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
 
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    cluster: "",
-    status: "active",
+    start: "",
+    end: "",
   });
 
   // ================= FETCH =================
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/courts");
-      setData(res.data);
+      const res = await axios.get("/api/time-slots");
+      setData(res.data || []);
     } catch (err) {
-      console.error("Fetch courts error:", err);
+      console.error("Fetch time slots error:", err);
     } finally {
       setLoading(false);
     }
@@ -44,10 +43,8 @@ const CourtsPage = () => {
   const handleOpenAdd = () => {
     setEditingItem(null);
     setFormData({
-      name: "",
-      description: "",
-      cluster: "",
-      status: "active",
+      start: "",
+      end: "",
     });
     setShowModal(true);
   };
@@ -57,13 +54,21 @@ const CourtsPage = () => {
     setEditingItem(item);
 
     setFormData({
-      name: item.name || "",
-      description: item.description || "",
-      cluster: item.cluster || "",
-      status: item.status || "active",
+      start: item.start || "",
+      end: item.end || "",
     });
 
     setShowModal(true);
+  };
+
+  // ================= HANDLE CHANGE =================
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // ================= SUBMIT =================
@@ -71,15 +76,15 @@ const CourtsPage = () => {
     setLoading(true);
     try {
       if (editingItem) {
-        await axios.put(`/api/courts/${editingItem.id}`, formData);
+        await axios.put(`/api/time-slots/${editingItem.id}`, formData);
       } else {
-        await axios.post("/api/courts", formData);
+        await axios.post("/api/time-slots", formData);
       }
 
       setShowModal(false);
       fetchData();
     } catch (err) {
-      console.error("Submit error:", err);
+      console.error("Submit time slot error:", err);
     } finally {
       setLoading(false);
     }
@@ -87,49 +92,37 @@ const CourtsPage = () => {
 
   // ================= DELETE =================
   const handleDelete = async (id) => {
-    if (window.confirm("Xóa sân này?")) {
-      try {
-        await axios.delete(`/api/courts/${id}`);
-        fetchData();
-      } catch (err) {
-        console.error("Delete error:", err);
-      }
+    if (!window.confirm("Xóa khung giờ này?")) return;
+
+    try {
+      await axios.delete(`/api/time-slots/${id}`);
+      fetchData();
+    } catch (err) {
+      console.error("Delete error:", err);
     }
   };
 
-  // ================= NORMALIZE =================
-  const normalize = (s) =>
-    s
-      ? s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-      : "";
-
   // ================= FILTER =================
-  const filtered = data.filter((c) => {
-    const matchSearch =
-      !searchTerm ||
-      normalize(c.name).includes(normalize(searchTerm)) ||
-      normalize(c.description || "").includes(normalize(searchTerm));
-
-    const matchStatus =
-      !statusFilter || c.status === statusFilter;
-
-    return matchSearch && matchStatus;
-  });
+  const filteredData = data.filter((t) =>
+    `${t.start} ${t.end}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   // ================= UI =================
   return (
     <div className="animate-slide-in">
 
-      {/* HEADER */}
+      {/* HEADER (giống CourtsPage) */}
       <div className="d-flex justify-content-between mb-3">
-        <h2>Quản lý Sân</h2>
+        <h2>Quản lý khung giờ</h2>
 
         <Button onClick={handleOpenAdd}>
           <FaPlus className="me-1" /> Thêm
         </Button>
       </div>
 
-      {/* FILTER */}
+      {/* FILTER (giống CourtsPage) */}
       <Card className="mb-3">
         <Card.Body>
           <Row>
@@ -137,23 +130,11 @@ const CourtsPage = () => {
             <Col md={6}>
               <InputGroup>
                 <Form.Control
-                  placeholder="Tìm sân..."
+                  placeholder="Tìm khung giờ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
-            </Col>
-
-            <Col md={3}>
-              <Form.Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">Tất cả</option>
-                <option value="active">Hoạt động</option>
-                <option value="maintenance">Bảo trì</option>
-                <option value="inactive">Ngưng</option>
-              </Form.Select>
             </Col>
 
           </Row>
@@ -161,24 +142,24 @@ const CourtsPage = () => {
       </Card>
 
       {/* TABLE */}
-      <CourtTable
-        courts={filtered}
+      <TimeSlotTable
+        timeSlots={filteredData}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
       />
 
       {/* FORM */}
-      <CourtForm
+      <TimeSlotModal
         show={showModal}
         onHide={() => setShowModal(false)}
         onSubmit={handleSubmit}
-        court={editingItem}
         formData={formData}
-        setFormData={setFormData}
+        handleChange={handleChange}
+        editingTimeSlot={editingItem}
       />
 
     </div>
   );
 };
 
-export default CourtsPage;
+export default TimeSlotsPage;

@@ -1,10 +1,11 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import UsersPage from './pages/UsersPage';
-import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
-import RegisterPage from './pages/RegisterPage';
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import UsersPage from "./pages/UsersPage";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import RegisterPage from "./pages/RegisterPage";
 import AdminLayout from "./components/AdminLayout";
-import Dashboard from './pages/Dashboard';
+import Dashboard from "./pages/Dashboard";
 import CourtsPage from "./pages/CourtsPage";
 import BookingsPage from "./pages/BookingsPage";
 import CustomerManagement from "./pages/CustomerManagement";
@@ -13,13 +14,49 @@ import UserProfilePage from "./pages/UserProfilePage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PricingPage from "./pages/PricingPage";
-import PromotionsPage from "./pages/PromotionsPage";
+import TimeSlotsPage from "./pages/TimeSlotsPage";
 import { FaTachometerAlt } from "react-icons/fa";
 import { restoreSession } from "./services/apiClient";
 import { getToken } from "./utils/auth";
 
 
+
 function App() {
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(getToken()));
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const bootstrap = async () => {
+      const ok = await restoreSession();
+
+      if (!isMounted) return;
+      setIsAuthenticated(ok && Boolean(getToken()));
+      setIsBootstrapping(false);
+    };
+
+    const onLogin = () => setIsAuthenticated(true);
+    const onLogout = () => setIsAuthenticated(false);
+
+    window.addEventListener("auth:login", onLogin);
+    window.addEventListener("auth:logout", onLogout);
+
+    bootstrap();
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("auth:login", onLogin);
+      window.removeEventListener("auth:logout", onLogout);
+    };
+  }, []);
+
+  if (isBootstrapping) {
+    return (
+      <div className="p-4 text-center">Dang khoi phuc phien dang nhap...</div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -74,18 +111,22 @@ function App() {
       <Route
         path="/admin"
         element={
-          // <ProtectedRoute requiredRole="admin">
+
+          <ProtectedRoute requiredRole="admin">
             <AdminLayout />
-          // </ProtectedRoute>
+          </ProtectedRoute>
+
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="courts" element={<CourtsPage />} />
         <Route path="pricing" element={<PricingPage />} />
         <Route path="bookings" element={<BookingsPage />} />
-        <Route path="promotions" element={<PromotionsPage />} />
+        <Route path="timeslots" element={<TimeSlotsPage />} />
         <Route path="customers" element={<CustomerManagement />} />
+
       </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

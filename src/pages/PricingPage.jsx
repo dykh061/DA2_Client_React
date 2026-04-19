@@ -4,6 +4,7 @@ import axios from "axios";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
 import { FaPlus, FaSearch } from "react-icons/fa";
 
+
 import PricingTable from "../components/PricingTable.jsx";
 import PricingForm from "../components/PricingForm.jsx";
 

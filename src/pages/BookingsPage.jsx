@@ -1,8 +1,10 @@
+
 // Quản lý đặt sân
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
 import { FaPlus, FaSearch } from "react-icons/fa";
+
 import BookingTable from "../components/BookingTable.jsx";
 import BookingForm from "../components/BookingForm.jsx";
 
@@ -13,6 +15,7 @@ const BookingsPage = () => {
   const [loading, setLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
+
   const [editingItem, setEditingItem] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,6 +28,7 @@ const BookingsPage = () => {
     date: "",
     time: "",
     status: "PENDING",
+
 
   });
 
@@ -163,6 +167,7 @@ const BookingsPage = () => {
         <div>
           <h2 className="fw-bold mb-1">Quản lý Đặt sân</h2>
           <p className="text-muted small">
+
             Theo dõi và quản lý các lượt đặt sân trong hệ thống
           </p>
         </div>
@@ -171,6 +176,7 @@ const BookingsPage = () => {
           onClick={handleOpenAdd}
           className="d-flex align-items-center shadow-sm px-4 py-2 rounded-3 fw-bold border-0"
           style={{ background: "linear-gradient(45deg, #FF8C00, #FFA500)" }}
+
 
         >
           <FaPlus className="me-2" /> Thêm đặt sân
@@ -194,13 +200,14 @@ const BookingsPage = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="bg-transparent border-0 shadow-none"
                 />
-
               </InputGroup>
             </Col>
 
             <Col md={4}>
 
+
               <Form.Select
+
 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -235,6 +242,7 @@ const BookingsPage = () => {
       {/* FORM */}
       <BookingForm
         show={showModal}
+
 
         onHide={() => setShowModal(false)}
         onSubmit={handleSubmit}

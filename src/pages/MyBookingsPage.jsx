@@ -1,6 +1,37 @@
-import { Link } from 'react-router-dom';
-
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
+import { logout } from "../services/authService";
+import { decodeAccessToken, getToken } from "../utils/auth";
 function MyBookingsPage() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const currentUser = user?.data ?? user ?? null;
+  const tokenPayload = decodeAccessToken(getToken());
+  const isAdmin = tokenPayload?.role === "admin";
+  const profilePath = isAdmin ? "/admin/profile" : "/profile-user";
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+      } catch (err) {
+        alert(err.message);
+        navigate("/login");
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    navigate("/login");
+  };
+
   return (
     <div className="booking-screen booking-compact">
       <header className="booking-nav">
@@ -27,12 +58,30 @@ function MyBookingsPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
+          <Link to={profilePath} className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </nav>
 
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
-          Đăng nhập
-        </Link>
+        {user ? (
+          <div className="menu-link login-link">
+            <i className="fa-regular fa-user"></i>
+            {currentUser?.username || "Người dùng"}
+            <button
+              type="button"
+              className="logout-button"
+              onClick={handleLogout}
+            >
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <main className="booking-content">
@@ -47,7 +96,9 @@ function MyBookingsPage() {
           </div>
           <h2>Chưa có lịch đặt sân</h2>
           <p>Bạn chưa có lịch đặt sân nào. Hãy đặt sân ngay!</p>
-          <Link to="/booking" className="btn-booking-cta">Đặt sân ngay</Link>
+          <Link to="/booking" className="btn-booking-cta">
+            Đặt sân ngay
+          </Link>
         </section>
       </main>
     </div>

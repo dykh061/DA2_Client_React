@@ -1,4 +1,5 @@
 
+
 // QUẢN LÝ KHÁCH HÀNG (USER MANAGEMENT)
 import React, { useEffect, useState } from "react";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
@@ -20,6 +21,7 @@ const CustomerManagement = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -81,6 +83,7 @@ const CustomerManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
   const openAdd = () => {
     setEditingItem(null);
     setFormData({ name: "", email: "", phone: "", password: "" });
@@ -120,8 +123,8 @@ const CustomerManagement = () => {
     } catch (err) {
       console.error(err);
 
+
     }
-    setShowModal(false); // Lưu xong thì đóng Modal
   };
 
 
@@ -149,6 +152,7 @@ const CustomerManagement = () => {
       normalize(u.email).includes(search)
     );
 
+
   });
 
   // ================= UI =================
@@ -158,6 +162,7 @@ const CustomerManagement = () => {
       {/* HEADER */}
       <div className="d-flex justify-content-between mb-4">
         <div>
+
           <h2 className="fw-bold">Quản lý khách hàng</h2>
           <p className="text-muted small">Quản lý tài khoản người dùng hệ thống</p>
         </div>
@@ -200,6 +205,7 @@ const CustomerManagement = () => {
         customer={editingItem}
         formData={formData}
         handleChange={handleChange}
+
 
       />
     </div>

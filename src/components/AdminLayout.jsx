@@ -1,12 +1,26 @@
-import React from 'react';
-import { Nav, Navbar, Container, Dropdown, Image } from 'react-bootstrap';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaTableTennis, FaHistory, FaCalendarAlt, FaStar, FaSignOutAlt, FaChevronRight } from 'react-icons/fa';
-
+import React, { useEffect } from "react";
+import { Nav, Navbar, Container, Dropdown, Image } from "react-bootstrap";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import {
+  FaTachometerAlt,
+  FaUsers,
+  FaTableTennis,
+  FaHistory,
+  FaCalendarAlt,
+  FaStar,
+  FaSignOutAlt,
+  FaChevronRight,
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../services/userService";
+import { logout } from "../services/authService";
 const AdminLayout = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const [user, setUser] = React.useState(null);
+  const currentUser = user?.data ?? user ?? null;
   const menuItems = [
+
 
   {
     title: "Dashboard",
@@ -29,8 +43,8 @@ const AdminLayout = () => {
     icon: <FaCalendarAlt />,
   },
   {
-    title: "Khuyến mãi",
-    path: "/admin/promotions",
+    title: "Quản lý khung giờ",
+    path: "/admin/timeslots",
     icon: <FaStar />,
   },
   {
@@ -61,6 +75,7 @@ const AdminLayout = () => {
     navigate("/login");
   };
 
+
   return (
     <div className="admin-wrapper">
       {/* SIDEBAR */}
@@ -69,7 +84,7 @@ const AdminLayout = () => {
           <div className="brand-logo">CL</div>
           <h4 className="m-0 fw-bold text-white">DatSanCaulong Admin</h4>
         </div>
-        
+
         <div className="sidebar-divider"></div>
 
         <Nav className="flex-column sidebar-nav">
@@ -80,19 +95,23 @@ const AdminLayout = () => {
                 as={Link}
                 to={item.path}
                 key={item.path}
-                className={`nav-item-custom ${isActive ? 'active' : ''}`}
+                className={`nav-item-custom ${isActive ? "active" : ""}`}
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-text">{item.title}</span>
-                {isActive && <FaChevronRight className="ms-auto active-arrow" size={10} />}
+                {isActive && (
+                  <FaChevronRight className="ms-auto active-arrow" size={10} />
+                )}
               </Nav.Link>
             );
           })}
         </Nav>
 
         <div className="sidebar-footer">
-          <Nav.Link as={Link} to="/logout" className="logout-btn">
-            <span className="nav-icon"><FaSignOutAlt /></span>
+          <Nav.Link as="button" onClick={handleLogout} className="logout-btn">
+            <span className="nav-icon">
+              <FaSignOutAlt />
+            </span>
             <span>Đăng xuất</span>
           </Nav.Link>
         </div>
@@ -103,17 +122,19 @@ const AdminLayout = () => {
         <Navbar className="navbar-custom px-4 shadow-sm">
           <Container fluid className="p-0">
             <div className="breadcrumb-wrapper">
-              <span className="text-muted me-2">Pages /</span>
-              <span className="fw-bold text-dark">
-                {menuItems.find(item => location.pathname === item.path)?.title || 'Dashboard'}
-              </span>
+              <Link to="/" className="menu-link">
+                <i className="fa-solid fa-house" aria-hidden="true"></i>
+                <span>Trang chủ</span>
+              </Link>
             </div>
-            
+
             <Navbar.Collapse className="justify-content-end">
               <Dropdown align="end" className="profile-dropdown">
                 <Dropdown.Toggle as="div" className="user-profile-toggle">
                   <div className="user-info d-none d-sm-block">
-                    <span className="user-name">Admin User</span>
+                    <span className="user-name">
+                      {currentUser?.username || ""}
+                    </span>
                     <span className="user-role">Administrator</span>
                   </div>
                   <div className="avatar-wrapper">
@@ -125,19 +146,23 @@ const AdminLayout = () => {
                     <span className="online-status"></span>
                   </div>
                 </Dropdown.Toggle>
-                
+
                 <Dropdown.Menu className="dropdown-menu-custom border-0 shadow-lg mt-3">
-                   <Dropdown.Header>Tài khoản</Dropdown.Header>
-                   <Dropdown.Item as={Link} to="/admin/profile">Trang cá nhân</Dropdown.Item>
-                   <Dropdown.Item href="#settings">Cài đặt</Dropdown.Item>
-                   <Dropdown.Divider />
-                   <Dropdown.Item href="#logout" className="text-danger">Đăng xuất</Dropdown.Item>
+                  <Dropdown.Header>Tài khoản</Dropdown.Header>
+                  <Dropdown.Item as={Link} to="/admin/profile">
+                    Trang cá nhân
+                  </Dropdown.Item>
+                  <Dropdown.Item href="#settings">Cài đặt</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout} className="text-danger">
+                    Đăng xuất
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        
+
         <section className="admin-page-body">
           <Outlet />
         </section>
@@ -147,3 +172,4 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
+
