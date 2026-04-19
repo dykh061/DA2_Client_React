@@ -7,13 +7,59 @@ const AdminLayout = () => {
   const location = useLocation();
 
   const menuItems = [
-    { title: 'Dashboard', path: '/admin/dashboard', icon: <FaTachometerAlt /> },
-    { title: 'Người dùng', path: '/admin/customers', icon: <FaUsers /> },
-    { title: 'Quản lý Sân', path: '/admin/courts', icon: <FaTableTennis /> },
-    { title: 'Đặt sân', path: '/admin/bookings', icon: <FaCalendarAlt /> },
-    { title: 'Lịch sử', path: '/admin/history', icon: <FaHistory /> },
-    { title: 'Đánh giá', path: '/admin/reviews', icon: <FaStar /> },
-  ];
+
+  {
+    title: "Dashboard",
+    path: "/admin/dashboard",
+    icon: <FaTachometerAlt />,
+  },
+  {
+    title: "Quản lý sân",
+    path: "/admin/courts",
+    icon: <FaTableTennis />,
+  },
+  {
+    title: "Quản lý giá sân",
+    path: "/admin/pricing",
+    icon: <FaCalendarAlt />,
+  },
+  {
+    title: "Quản lý đơn hàng",
+    path: "/admin/bookings",
+    icon: <FaCalendarAlt />,
+  },
+  {
+    title: "Khuyến mãi",
+    path: "/admin/promotions",
+    icon: <FaStar />,
+  },
+  {
+    title: "Người dùng",
+    path: "/admin/customers",
+    icon: <FaUsers />,
+  },
+];
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getUser();
+        setUser(data);
+      } catch (err) {
+        console.log(err);
+        alert(err.message);
+        navigate("../login");
+       
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <div className="admin-wrapper">
@@ -28,7 +74,7 @@ const AdminLayout = () => {
 
         <Nav className="flex-column sidebar-nav">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname.startsWith(item.path);
             return (
               <Nav.Link
                 as={Link}
