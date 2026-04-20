@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from '../config/api';
-import { logoutSession, publicRequest } from './apiClient';
+import { apiRequest, logoutSession, publicRequest } from './apiClient';
 import {
   clearSession,
   getToken,
@@ -181,7 +181,6 @@ export const getDisplayName = (userInput) => {
 };
 
 export const getMyProfile = async () => {
-  const { apiRequest } = await import('./apiClient');
   return apiRequest(
     API_ENDPOINTS.USER_ME,
     { method: 'GET' },
