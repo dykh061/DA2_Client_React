@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  clearAuthSession,
-  extractAccessToken,
-  getDisplayName,
-  getCurrentUser,
-  getMyProfile,
-  login,
-  saveAccessToken,
-  saveCurrentUser,
-} from '../services/authService';
+import { clearAuthSession, getCurrentUser, getDisplayName, login } from '../services/authService';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -48,30 +39,7 @@ function LoginPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await login({ email, password });
-      const accessToken = extractAccessToken(response);
-
-      if (!accessToken) {
-        throw new Error('Đăng nhập thành công nhưng backend chưa trả access token đúng format.');
-      }
-
-      saveAccessToken(accessToken);
-
-      const fallbackUser = response?.user || response?.data?.user || null;
-      if (fallbackUser) {
-        saveCurrentUser(fallbackUser);
-      }
-
-      try {
-        const profileResponse = await getMyProfile();
-        const profileData = profileResponse?.data || profileResponse?.user || null;
-        if (profileData) {
-          saveCurrentUser(profileData);
-        }
-      } catch {
-        // Profile fetch can fail independently; login token is still valid.
-      }
-
+      await login({ email, password });
       setSuccessMessage('Đăng nhập thành công. Đang chuyển hướng...');
       setTimeout(() => {
         navigate('/my-bookings', { replace: true });

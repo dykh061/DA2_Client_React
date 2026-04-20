@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  clearAuthSession,
+  logout,
   getAccessToken,
   getCurrentUser,
   getDisplayName,
@@ -14,6 +14,7 @@ import { getCourts } from '../services/courtService';
 import { getPricings } from '../services/pricingService';
 import { getTimeSlots } from '../services/timeSlotService';
 import { getMyProfile, updateMyProfile } from '../services/userService';
+import { decodeAccessToken, getToken } from '../utils/auth';
 
 const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
 const getPhoneFromUser = (userInput) =>
@@ -180,10 +181,13 @@ function UsersPage() {
   const [hasRegisteredPhone, setHasRegisteredPhone] = useState(false);
   const currentUser = getCurrentUser();
   const greetingName = getDisplayName(currentUser);
+  const tokenPayload = decodeAccessToken(getToken());
+  const isAdmin = tokenPayload?.role === 'admin';
+  const profilePath = isAdmin ? '/admin/profile' : '/profile-user';
 
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate('/', { replace: true });
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   const hasToken = Boolean(getAccessToken());
@@ -595,6 +599,10 @@ function UsersPage() {
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
           </Link>
+          <Link to={profilePath} className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </nav>
 
         {currentUser ? (
@@ -712,7 +720,10 @@ function UsersPage() {
             <div className="time-table">
               <div className="time-cell heading cell-court">Khung giờ</div>
               {timeSlots.map((slot) => (
-                <div key={`${slot.id}-heading`} className="time-cell heading cell-slot">
+                <div
+                  key={`${slot.id}-heading`}
+                  className="time-cell heading cell-slot"
+                >
                   <span>{slot.range}</span>
                   <small>{slot.period}</small>
                 </div>
@@ -732,7 +743,11 @@ function UsersPage() {
                     disabled={slotStatus !== 'available'}
                     title={slotStatus === 'booked' ? 'Khung giờ đã được đặt' : `Chọn ${slot.range}`}
                   >
-                    {isSelected ? 'Đang chọn' : slotStatus === 'available' ? 'Trống' : 'Đã đặt'}
+                    {isSelected
+                      ? 'Đang chọn'
+                      : slotStatus === 'available'
+                        ? 'Trống'
+                        : 'Đã đặt'}
                   </button>
                 );
               })}
@@ -773,7 +788,9 @@ function UsersPage() {
 
         <section className="booking-card summary-card">
           <h2>Tóm tắt đặt sân</h2>
-          <p className="summary-subtitle">Kiểm tra thông tin trước khi xác nhận</p>
+          <p className="summary-subtitle">
+            Kiểm tra thông tin trước khi xác nhận
+          </p>
 
           <dl>
             <div>
@@ -786,7 +803,11 @@ function UsersPage() {
             </div>
             <div>
               <dt>Giờ</dt>
-              <dd>{selectedTimes.length > 0 ? selectedTimes.join(', ') : 'Chưa chọn'}</dd>
+              <dd>
+                {selectedTimes.length > 0
+                  ? selectedTimes.join(', ')
+                  : 'Chưa chọn'}
+              </dd>
             </div>
             <div>
               <dt>Khách hàng</dt>

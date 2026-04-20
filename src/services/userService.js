@@ -1,46 +1,45 @@
 import { API_ENDPOINTS } from '../config/api';
-import { getAuthHeaders } from './authService';
+import { apiRequest } from './apiClient';
+import { decodeAccessToken, getToken } from '../utils/auth';
 
-const parseErrorMessage = async (res, fallbackMessage) => {
-  try {
-    const data = await res.json();
-    if (data?.error) return data.error;
-    if (data?.message) return data.message;
-    return fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
+export const getAllUsers = async () => {
+  const res = await apiRequest(
+    API_ENDPOINTS.USERS,
+    { method: 'GET' },
+    'Loi khi tai danh sach nguoi dung',
+  );
+  return res;
 };
 
-const requestJson = async (url, options, fallbackMessage) => {
-  const res = await fetch(url, options);
+export const getUser = async () => {
+  const tokenPayload = decodeAccessToken(getToken());
+  const userId = tokenPayload?.userId;
 
-  if (!res.ok) {
-    const errorMessage = await parseErrorMessage(res, fallbackMessage);
-    throw new Error(`${errorMessage} (HTTP ${res.status})`);
+  if (!userId) {
+    throw new Error(
+      'Khong xac dinh duoc user hien tai. Vui long dang nhap lai.',
+    );
   }
 
-  if (res.status === 204) return null;
-  return res.json();
+  const res = await apiRequest(
+    API_ENDPOINTS.USER_BY_ID(userId),
+    { method: 'GET' },
+    'Loi khi lay thong tin nguoi dung',
+  );
+
+  return res;
 };
 
 export const getMyProfile = async () => {
-  return requestJson(
+  return apiRequest(
     API_ENDPOINTS.USER_ME,
-    {
-      method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-      },
-    },
-    'Không thể lấy thông tin cá nhân'
+    { method: 'GET' },
+    'Không thể lấy thông tin cá nhân',
   );
 };
 
 export const updateMyProfile = async ({ username, email, password, phone_number }) => {
-  const payload = {
-    phone_number,
-  };
+  const payload = { phone_number };
 
   if (username?.trim()) {
     payload.username = username;
@@ -54,29 +53,40 @@ export const updateMyProfile = async ({ username, email, password, phone_number 
     payload.password = password;
   }
 
-  return requestJson(
+  return apiRequest(
     API_ENDPOINTS.USER_ME,
     {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeaders(),
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     },
-    'Không thể cập nhật thông tin người dùng'
+    'Không thể cập nhật thông tin người dùng',
   );
 };
 
 export const getAllUsersForAdmin = async () => {
-  return requestJson(
+  return apiRequest(
     API_ENDPOINTS.USERS_ALL,
+    { method: 'GET' },
+    'Không thể tải danh sách người dùng',
+  );
+};
+
+export const updateUser = async (formData) => {
+  const body = {
+    username: formData.name,
+    email: formData.email,
+    phone_number: formData.phone,
+    password: formData.password,
+  };
+
+  return apiRequest(
+    API_ENDPOINTS.USER_ME,
     {
-      method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-      },
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     },
-    'Không thể tải danh sách người dùng'
+    'Cap nhat user that bai',
   );
 };

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { clearAuthSession, getCurrentUser, getDisplayName } from '../services/authService';
+import { logout, getCurrentUser, getDisplayName } from '../services/authService';
 import { getCachedBookings, getMyBookings } from '../services/bookingService';
+import { decodeAccessToken, getToken } from '../utils/auth';
 
 const formatCurrency = (amount) => {
   const numericValue = Number(amount);
@@ -46,6 +47,9 @@ function MyBookingsPage() {
   const [remoteBookings, setRemoteBookings] = useState([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const tokenPayload = decodeAccessToken(getToken());
+  const isAdmin = tokenPayload?.role === 'admin';
+  const profilePath = isAdmin ? '/admin/profile' : '/profile-user';
 
   const cachedBookings = useMemo(() => {
     return getCachedBookings().filter((booking) => {
@@ -102,9 +106,9 @@ function MyBookingsPage() {
     };
   }, [normalizedCurrentEmail]);
 
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate('/', { replace: true });
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -132,6 +136,10 @@ function MyBookingsPage() {
           <Link to="/my-bookings" className="menu-link active">
             <i className="fa-solid fa-list" aria-hidden="true"></i>
             <span>Lịch của tôi</span>
+          </Link>
+          <Link to={profilePath} className="menu-link">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Thông tin cá nhân</span>
           </Link>
         </nav>
 

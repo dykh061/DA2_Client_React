@@ -131,11 +131,13 @@ function HomePage() {
             tiện lợi
           </h1>
           <p>
-            Hệ thống sân cầu lông chuyên nghiệp với thiết bị hiện đại, phục vụ 24/7 cho mọi nhu cầu của bạn.
+            Hệ thống sân cầu lông chuyên nghiệp với thiết bị hiện đại, phục vụ
+            24/7 cho mọi nhu cầu của bạn.
           </p>
           <div className="home-hero-actions">
             <Link to="/booking" className="home-btn-primary">
-              Đặt sân ngay <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              Đặt sân ngay{" "}
+              <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </Link>
             <Link to="/my-bookings" className="home-btn-secondary">
               Xem lịch đặt
@@ -180,7 +182,8 @@ function HomePage() {
         <h2>Sẵn sàng chơi cầu lông?</h2>
         <p>Đặt sân ngay hôm nay và tận hưởng trải nghiệm tuyệt vời</p>
         <Link to="/booking" className="home-btn-primary cta-btn">
-          Đặt sân ngay <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          Đặt sân ngay{" "}
+          <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </Link>
       </section>
     </div>

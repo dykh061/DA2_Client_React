@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   clearAuthSession,
-  extractAccessToken,
-  getDisplayName,
   getCurrentUser,
+  getDisplayName,
   register,
-  saveAccessToken,
   savePreferredFullName,
   savePreferredPhoneNumber,
 } from '../services/authService';
@@ -74,18 +72,13 @@ function RegisterPage() {
       if (phone) {
         savePreferredPhoneNumber(email, phone);
       }
-      const response = await register({
+      await register({
         email,
         password,
         fullName,
         username,
         phoneNumber: phone,
       });
-      const accessToken = extractAccessToken(response);
-
-      if (accessToken) {
-        saveAccessToken(accessToken);
-      }
 
       setSuccessMessage('Đăng ký thành công. Đang chuyển sang trang đăng nhập...');
       setTimeout(() => {
