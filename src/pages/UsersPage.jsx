@@ -23,6 +23,11 @@ const formatCurrency = (amount) => {
 };
 const getPhoneFromUser = (userInput) =>
   String(userInput?.phone_number || userInput?.phoneNumber || userInput?.phone || '').trim();
+const getTodayLocalDateInputValue = () => {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return localDate.toISOString().split('T')[0];
+};
 
 const normalizeDateKey = (value) => {
   const raw = String(value || '').trim();
@@ -645,7 +650,7 @@ function UsersPage() {
               id="booking-date"
               type="date"
               value={date}
-              min={new Date().toISOString().split('T')[0]}
+              min={getTodayLocalDateInputValue()}
               onChange={(event) => {
                 setDate(event.target.value);
                 setSelectedTimeSlotIds([]);
