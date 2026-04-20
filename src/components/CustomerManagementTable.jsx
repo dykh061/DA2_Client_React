@@ -1,55 +1,61 @@
-import React from 'react';
-import { Table, Button, Badge } from 'react-bootstrap';
+import React from "react";
+import { Table, Button } from "react-bootstrap";
 
 const CustomerManagementTable = ({ customers = [], onEdit, onDelete }) => {
   return (
-    <div className="customer-table p-0">
-      <Table responsive hover className="align-middle mb-0">
-        <thead className="bg-light">
-          <tr>
-            <th className="ps-4 py-3 text-secondary small fw-bold text-uppercase">ID</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Họ tên</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Email</th>
-            {/* <th className="py-3 text-secondary small fw-bold text-uppercase">Vai trò</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Trạng thái</th> */}
-            <th className="py-3 text-secondary small fw-bold text-uppercase text-end pe-4">Thao tác</th>
+
+
+    <Table responsive hover className="align-middle mb-0">
+      <thead className="bg-light">
+        <tr>
+          <th>ID</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>SĐT</th>
+          <th className="text-end">Thao tác</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {customers.map((u) => (
+          <tr key={u.id}>
+            <td>#{u.id}</td>
+            <td className="fw-bold">{u.name}</td>
+            <td>{u.email}</td>
+            <td>{u.phone || "-"}</td>
+
+            <td className="text-end">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => onEdit(u)}
+              >
+                Sửa
+              </Button>
+
+              <Button
+                variant="link"
+                size="sm"
+                className="text-danger"
+                onClick={() => onDelete(u.id)}
+              >
+                Xóa
+              </Button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {customers.map((item) => (
-            <tr key={item.id}>
-              <td className="ps-4 text-muted small">#{item.id}</td>
-              <td className="fw-bold text-dark">{item.name}</td>
-              <td className="text-secondary">{item.email}</td>
-              {/* <td> */}
-                {/* <Badge bg={item.role === 'admin' ? 'danger' : 'info'} className="text-white fw-medium px-2 py-1">
-                  {item.role === 'admin' ? 'Quản trị' : 'Nhân viên'}
-                </Badge>
-              </td>
-              <td>
-                <Badge bg={item.status === 'active' ? 'success' : 'secondary'} className="px-2 py-1 fw-medium">
-                  {item.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
-                </Badge>
-              </td> */}
-              <td className="text-end pe-4">
-                <Button variant="link" size="sm" className="text-primary p-0 me-3 text-decoration-none fw-bold" onClick={() => onEdit(item)}>
-                  Sửa
-                </Button>
-                <Button variant="link" size="sm" className="text-danger p-0 text-decoration-none fw-bold" onClick={() => onDelete(item.id)}>
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-          {customers.length === 0 && (
-            <tr>
-              <td colSpan="6" className="text-center py-5 text-muted">Không tìm thấy khách hàng nào.</td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
-    </div>
+        ))}
+
+        {customers.length === 0 && (
+          <tr>
+            <td colSpan="5" className="text-center py-4 text-muted">
+              Không có khách hàng
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+
   );
 };
 
-export default CustomerManagementTable; 
+export default CustomerManagementTable;

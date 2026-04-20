@@ -3,6 +3,9 @@ import { clearSession, getToken, setToken } from "../utils/auth";
 
 let refreshPromise = null;
 
+const extractAccessToken = (data) =>
+  data?.accessToken || data?.tokens?.accessToken || null;
+
 const parseErrorMessage = async (res, fallbackMessage) => {
   try {
     const data = await res.json();
@@ -31,13 +34,14 @@ const fetchRefreshToken = async () => {
   }
 
   const data = await parseResponse(res);
+  const accessToken = extractAccessToken(data);
 
-  if (!data?.accessToken) {
+  if (!accessToken) {
     throw new Error("API refresh khong tra ve accessToken");
   }
 
-  setToken(data.accessToken);
-  return data.accessToken;
+  setToken(accessToken);
+  return accessToken;
 };
 
 const refreshAccessToken = async () => {

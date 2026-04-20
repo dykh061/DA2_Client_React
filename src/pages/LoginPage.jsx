@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+
+import { getUser } from "../utils/auth";
+
+
 function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -19,6 +23,7 @@ function LoginPage() {
       alert(err.message);
     }
   };
+
 
   return (
     <div className="login-screen">

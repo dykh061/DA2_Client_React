@@ -1,124 +1,120 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form, Row, Col, InputGroup } from 'react-bootstrap';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Form, Row, Col, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-const CustomerManagementForm = ({ show, onHide, onSubmit, customer }) => {
+const CustomerManagementForm = ({
+  show,
+  onHide,
+  onSubmit,
+  customer,
+  formData,
+  handleChange,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const isEdit = !!customer;
 
+  // RESET PASSWORD KHI MỞ ADD
+  useEffect(() => {
+    if (show && !isEdit) {
+      handleChange({
+        target: { name: "password", value: "" },
+      });
+    }
+  }, [show, isEdit]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    onSubmit(data);
+
+    const payload = {
+      ...formData,
+      name: formData.name?.trim(),
+      email: formData.email?.trim(),
+      phone: formData.phone?.trim(),
+    };
+
+    onSubmit(payload);
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered className="customer-form-modal">
-      <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold">{isEdit ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng mới'}</Modal.Title>
+    <Modal show={show} onHide={onHide} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {isEdit ? "Chỉnh sửa khách hàng" : "Thêm khách hàng"}
+        </Modal.Title>
       </Modal.Header>
+
       <Form onSubmit={handleSubmit}>
-        <Modal.Body className="p-4">
+        <Modal.Body>
           <Row className="g-3">
+
+            {/* NAME */}
             <Col md={12}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Họ và tên</Form.Label>
-                <Form.Control 
-                  name="name"
-                  type="text" 
-                  placeholder="Nhập họ và tên đầy đủ" 
-                  defaultValue={customer?.name}
-                  required 
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                />
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Email</Form.Label>
-                <Form.Control 
-                  name="email"
-                  type="email" 
-                  placeholder="example@mail.com" 
-                  defaultValue={customer?.email}
-                  required 
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                />
-              </Form.Group>
+              <Form.Control
+                name="name"
+                placeholder="Họ tên"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </Col>
 
+            {/* EMAIL */}
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Số điện thoại</Form.Label>
-                <Form.Control 
-                  name="phone"
-                  type="text" 
-                  placeholder="090 123 4567" 
-                  defaultValue={customer?.phone}
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                />
-              </Form.Group>
+              <Form.Control
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
             </Col>
 
-            {/* <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Vai trò</Form.Label>
-                <Form.Select 
-                  name="role"
-                  defaultValue={customer?.role || 'staff'}
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                >
-                  <option value="staff">Nhân viên (Staff)</option>
-                  <option value="admin">Quản trị viên (Admin)</option>
-                </Form.Select>
-              </Form.Group>
+            {/* PHONE */}
+            <Col md={6}>
+              <Form.Control
+                name="phone"
+                placeholder="Số điện thoại"
+                value={formData.phone}
+                onChange={handleChange}
+              />
             </Col>
 
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Trạng thái</Form.Label>
-                <Form.Select 
-                  name="status"
-                  defaultValue={customer?.status || 'active'}
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                >
-                  <option value="active">Đang hoạt động</option>
-                  <option value="inactive">Tạm khóa</option>
-                </Form.Select>
-              </Form.Group>
-            </Col> */}
+
+            {/* PASSWORD */}
+
 
             {!isEdit && (
               <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label className="small fw-bold text-secondary text-uppercase">Mật khẩu ban đầu</Form.Label>
-                  <InputGroup className="rounded-3 overflow-hidden border border-light shadow-sm">
-                    <Form.Control 
-                      name="password"
-                      type={showPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
-                      required 
-                      className="p-3 border-0 shadow-none bg-light bg-opacity-50"
-                    />
-                    <Button 
-                      variant="light" 
-                      className="border-0 px-3 bg-white text-muted"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </Button>
-                  </InputGroup>
-                </Form.Group>
+                <InputGroup>
+                  <Form.Control
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mật khẩu"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Button
+                    variant="light"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </Button>
+                </InputGroup>
               </Col>
             )}
+
           </Row>
         </Modal.Body>
-        <Modal.Footer className="border-0 pt-0 p-4">
-          <Button variant="light" className="px-4 py-2 rounded-3 fw-bold" onClick={onHide}>Hủy</Button>
-          <Button variant="primary" type="submit" className="px-4 py-2 rounded-3 fw-bold shadow-sm">
-            {isEdit ? 'Lưu thay đổi' : 'Tạo khách hàng'}
+
+        <Modal.Footer>
+          <Button variant="light" onClick={onHide}>
+            Hủy
+          </Button>
+
+          <Button type="submit" variant="primary">
+            {isEdit ? "Cập nhật" : "Thêm"}
           </Button>
         </Modal.Footer>
       </Form>

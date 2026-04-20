@@ -1,73 +1,87 @@
-import React from 'react';
-import { Table, Button, Badge } from 'react-bootstrap';
+import React from "react";
+import { Table, Button, Badge } from "react-bootstrap";
 
 const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
+  const getStatus = (status) => {
+    switch (status) {
+      case "PENDING":
+        return { label: "Chờ xác nhận", bg: "warning" };
+      case "CONFIRMED":
+        return { label: "Đã xác nhận", bg: "success" };
+      case "COMPLETED":
+        return { label: "Hoàn thành", bg: "info" };
+      case "CANCELLED":
+        return { label: "Đã hủy", bg: "secondary" };
+      default:
+        return { label: "Không rõ", bg: "dark" };
+    }
+  };
+
   return (
     <div className="booking-table p-0">
       <Table responsive hover className="align-middle mb-0">
         <thead className="bg-light">
           <tr>
-            <th className="ps-4 py-3 text-secondary small fw-bold text-uppercase">ID</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Khách hàng</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Sân</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Thời gian</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase">Trạng thái</th>
-            <th className="py-3 text-secondary small fw-bold text-uppercase text-end pe-4">Thao tác</th>
+            <th className="ps-4 py-3">ID</th>
+            <th>Khách hàng</th>
+            <th>Sân</th>
+            <th>Thời gian</th>
+            <th>Trạng thái</th>
+            <th className="text-end pe-4">Thao tác</th>
           </tr>
         </thead>
+
         <tbody>
-          {bookings.map((booking) => (
-            <tr key={booking.id}>
-              <td className="ps-4 text-muted small">#{booking.id}</td>
-              <td className="fw-bold text-dark">{booking.name}</td>
-              <td>
-                <Badge bg="light" className="text-dark border fw-medium px-2 py-1">
-                  {booking.court}
-                </Badge>
-              </td>
-              <td>
-                <div className="small fw-medium">{booking.date}</div>
-                <div className="text-muted small">{booking.time}</div>
-              </td>
-              <td>
-                <Badge 
-                  bg={
-                    booking.status === 'Confirmed' ? 'success' : 
-                    booking.status === 'Pending' ? 'warning' : 
-                    booking.status === 'Completed' ? 'info' : 'secondary'
-                  } 
-                  className="px-2 py-1 fw-medium"
-                >
-                  {
-                    booking.status === 'Confirmed' ? 'Đã xác nhận' : 
-                    booking.status === 'Pending' ? 'Chờ xác nhận' : 
-                    booking.status === 'Completed' ? 'Hoàn thành' : 'Đã hủy'
-                  }
-                </Badge>
-              </td>
-              <td className="text-end pe-4">
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="text-primary p-0 me-3 text-decoration-none fw-bold"
-                  onClick={() => onEdit(booking)}
-                >
-                  Sửa
-                </Button>
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="text-danger p-0 text-decoration-none fw-bold"
-                  onClick={() => onDelete(booking.id)}
-                >
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
+          {bookings.map((b) => {
+            const status = getStatus(b.status);
+
+            return (
+              <tr key={b.id}>
+                <td className="ps-4 text-muted">#{b.id}</td>
+
+                <td className="fw-bold">{b.name}</td>
+
+                <td>
+                  <Badge bg="light" text="dark" className="border">
+                    {b.court}
+                  </Badge>
+                </td>
+
+                <td>
+                  <div className="small">{b.date}</div>
+                  <div className="text-muted small">{b.time}</div>
+                </td>
+
+                <td>
+                  <Badge bg={status.bg}>{status.label}</Badge>
+                </td>
+
+                <td className="text-end pe-4">
+                  <Button
+                    variant="link"
+                    className="text-primary p-0 me-3"
+                    onClick={() => onEdit(b)}
+                  >
+                    Sửa
+                  </Button>
+
+                  <Button
+                    variant="link"
+                    className="text-danger p-0"
+                    onClick={() => onDelete(b.id)}
+                  >
+                    Xóa
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
+
           {bookings.length === 0 && (
             <tr>
-              <td colSpan="6" className="text-center py-5 text-muted">Không tìm thấy phiếu đặt sân nào.</td>
+              <td colSpan="6" className="text-center py-5 text-muted">
+                Không có dữ liệu
+              </td>
             </tr>
           )}
         </tbody>
