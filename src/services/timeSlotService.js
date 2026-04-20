@@ -85,74 +85,90 @@ const buildUpdatePayload = ({ start_time, end_time }) => {
   return payload;
 };
 
-const getAuthJsonHeaders = () => ({
-  'Content-Type': 'application/json',
-  ...getAuthHeaders(),
-});
+// const getAuthJsonHeaders = () => ({
+//   'Content-Type': 'application/json',
+//   ...getAuthHeaders(),
+// });
 
-export const getTimeSlots = async () => {
+// export const getTimeSlots = async () => {
+//   return requestJson(
+//     API_ENDPOINTS.TIME_SLOTS,
+//     {
+//       method: 'GET',
+//       headers: {
+//         ...getAuthHeaders(),
+//       },
+//     },
+//     'Không thể lấy danh sách time slot'
+//   );
+// };
+
+// export const getTimeSlotById = async (id) => {
+//   return requestJson(
+//     API_ENDPOINTS.TIME_SLOT_BY_ID(id),
+//     {
+//       method: 'GET',
+//       headers: {
+//         ...getAuthHeaders(),
+//       },
+//     },
+//     'Không thể lấy chi tiết time slot'
+//   );
+// };
+
+// export const createTimeSlot = async ({ start_time, end_time }) => {
+//   const payload = buildCreatePayload({ start_time, end_time });
+
+//   return requestJson(
+//     API_ENDPOINTS.TIME_SLOTS,
+//     {
+//       method: 'POST',
+//       headers: getAuthJsonHeaders(),
+//       body: JSON.stringify(payload),
+//     },
+//     'Không thể tạo time slot'
+//   );
+// };
+
+// export const updateTimeSlot = async (id, { start_time, end_time }) => {
+//   const payload = buildUpdatePayload({ start_time, end_time });
+
+//   return requestJson(
+//     API_ENDPOINTS.TIME_SLOT_BY_ID(id),
+//     {
+//       method: 'PUT',
+//       headers: getAuthJsonHeaders(),
+//       body: JSON.stringify(payload),
+//     },
+//     'Không thể cập nhật time slot'
+//   );
+// };
+
+// export const deleteTimeSlot = async (id) => {
+//   return requestJson(
+//     API_ENDPOINTS.TIME_SLOT_BY_ID(id),
+//     {
+//       method: 'DELETE',
+//       headers: {
+//         ...getAuthHeaders(),
+//       },
+//     },
+//     'Không thể xóa time slot'
+//   );
+// };
+
+
+
+export const getAvailableTimeSlots = async ({ courtId, date }) => {
+  const url = `${API_ENDPOINTS.BOOKINGS}availability?courtId=${courtId}&date=${date}`;
   return requestJson(
-    API_ENDPOINTS.TIME_SLOTS,
+    url,
     {
       method: 'GET',
       headers: {
         ...getAuthHeaders(),
       },
     },
-    'Không thể lấy danh sách time slot'
-  );
-};
-
-export const getTimeSlotById = async (id) => {
-  return requestJson(
-    API_ENDPOINTS.TIME_SLOT_BY_ID(id),
-    {
-      method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-      },
-    },
-    'Không thể lấy chi tiết time slot'
-  );
-};
-
-export const createTimeSlot = async ({ start_time, end_time }) => {
-  const payload = buildCreatePayload({ start_time, end_time });
-
-  return requestJson(
-    API_ENDPOINTS.TIME_SLOTS,
-    {
-      method: 'POST',
-      headers: getAuthJsonHeaders(),
-      body: JSON.stringify(payload),
-    },
-    'Không thể tạo time slot'
-  );
-};
-
-export const updateTimeSlot = async (id, { start_time, end_time }) => {
-  const payload = buildUpdatePayload({ start_time, end_time });
-
-  return requestJson(
-    API_ENDPOINTS.TIME_SLOT_BY_ID(id),
-    {
-      method: 'PUT',
-      headers: getAuthJsonHeaders(),
-      body: JSON.stringify(payload),
-    },
-    'Không thể cập nhật time slot'
-  );
-};
-
-export const deleteTimeSlot = async (id) => {
-  return requestJson(
-    API_ENDPOINTS.TIME_SLOT_BY_ID(id),
-    {
-      method: 'DELETE',
-      headers: {
-        ...getAuthHeaders(),
-      },
-    },
-    'Không thể xóa time slot'
+    'Không thể lấy danh sách khung giờ khả dụng'
   );
 };

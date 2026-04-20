@@ -12,9 +12,13 @@ import {
 import { createBooking, getMyBookings, saveCachedBooking } from '../services/bookingService';
 import { getCourts } from '../services/courtService';
 import { getPricings } from '../services/pricingService';
-import { getTimeSlots } from '../services/timeSlotService';
 import { getMyProfile, updateMyProfile } from '../services/userService';
 import { decodeAccessToken, getToken } from '../utils/auth';
+import { getAvailableTimeSlots } from "../services/timeSlotService";
+
+//tại sao lại có 1 đống booking page rồi chúng mày xài userpage z????
+
+
 
 const formatCurrency = (amount) => {
   const numericAmount = Number(amount);
@@ -171,13 +175,15 @@ const isPastDate = (dateString) => {
 };
 
 function UsersPage() {
+
+  const [availableSlots, setAvailableSlots] = useState([]);
+
   const navigate = useNavigate();
-  const [date, setDate] = useState('');
+  const [date, setDate] =  useState(getTodayLocalDateInputValue());
   const [courts, setCourts] = useState([]);
-  const [timeSlots, setTimeSlots] = useState([]);
   const [pricings, setPricings] = useState([]);
   const [bookingsForDate, setBookingsForDate] = useState([]);
-  const [selectedCourtId, setSelectedCourtId] = useState(null);
+  const [selectedCourtId, setSelectedCourtId] = useState(1);
   const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -273,9 +279,9 @@ function UsersPage() {
   const selectedTimes = useMemo(
     () =>
       selectedTimeSlotIds
-        .map((timeSlotId) => timeSlots.find((slot) => slot.id === timeSlotId)?.range)
+        .map((id) => availableSlots.find((s) => s.id === id)?.range)
         .filter(Boolean),
-    [selectedTimeSlotIds, timeSlots]
+    [selectedTimeSlotIds, availableSlots]
   );
 
   const canConfirm = Boolean(
@@ -290,68 +296,67 @@ function UsersPage() {
       !isSubmitting
   );
 
-  const bookedSlotIds = useMemo(() => {
-    const selectedDateKey = normalizeDateKey(date);
-    const selectedCourtNumber = Number(selectedCourtId);
-    const ids = new Set();
+  // const bookedSlotIds = useMemo(() => {
+  //   const selectedDateKey = normalizeDateKey(date);
+  //   const selectedCourtNumber = Number(selectedCourtId);
+  //   const ids = new Set();
 
-    if (!selectedDateKey || !Number.isInteger(selectedCourtNumber) || selectedCourtNumber <= 0) {
-      return ids;
-    }
+  //   if (!selectedDateKey || !Number.isInteger(selectedCourtNumber) || selectedCourtNumber <= 0) {
+  //     return ids;
+  //   }
 
-    bookingsForDate.forEach((booking) => {
-      const bookingCourtId = Number(booking?.courtId || booking?.court_id || booking?.court?.id);
-      const bookingDateKey = normalizeDateKey(
-        booking?.bookingDate || booking?.booking_date || booking?.date
-      );
+  //   bookingsForDate.forEach((booking) => {
+  //     const bookingCourtId = Number(booking?.courtId || booking?.court_id || booking?.court?.id);
+  //     const bookingDateKey = normalizeDateKey(
+  //       booking?.bookingDate || booking?.booking_date || booking?.date
+  //     );
 
-      if (bookingCourtId !== selectedCourtNumber || bookingDateKey !== selectedDateKey) {
-        return;
-      }
+  //     if (bookingCourtId !== selectedCourtNumber || bookingDateKey !== selectedDateKey) {
+  //       return;
+  //     }
 
-      const slotIds = Array.isArray(booking?.timeSlotIds)
-        ? booking.timeSlotIds
-        : Array.isArray(booking?.time_slot_ids)
-          ? booking.time_slot_ids
-          : [];
+  //     const slotIds = Array.isArray(booking?.timeSlotIds)
+  //       ? booking.timeSlotIds
+  //       : Array.isArray(booking?.time_slot_ids)
+  //         ? booking.time_slot_ids
+  //         : [];
 
-      slotIds.forEach((slotId) => {
-        const normalizedSlotId = Number(slotId);
-        if (Number.isInteger(normalizedSlotId) && normalizedSlotId > 0) {
-          ids.add(normalizedSlotId);
-        }
-      });
-    });
+  //     slotIds.forEach((slotId) => {
+  //       const normalizedSlotId = Number(slotId);
+  //       if (Number.isInteger(normalizedSlotId) && normalizedSlotId > 0) {
+  //         ids.add(normalizedSlotId);
+  //       }
+  //     });
+  //   });
 
-    return ids;
-  }, [bookingsForDate, date, selectedCourtId]);
+  //   return ids;
+  // }, [bookingsForDate, date, selectedCourtId]);
 
-  const activeSlotStatuses = useMemo(() => {
-    if (!selectedCourt || selectedCourt.status !== 'available') {
-      return timeSlots.map(() => 'booked');
-    }
+  // const activeSlotStatuses = useMemo(() => {
+  //   if (!selectedCourt || selectedCourt.status !== 'available') {
+  //     return availableSlots.map(() => 'booked');
+  //   }
 
-    return timeSlots.map((slot) => (bookedSlotIds.has(slot.id) ? 'booked' : 'available'));
-  }, [bookedSlotIds, selectedCourt, timeSlots]);
+  //   return availableSlots.map((slot) => (bookedSlotIds.has(slot.id) ? 'booked' : 'available'));
+  // }, [bookedSlotIds, selectedCourt, availableSlots]);
 
-  const slotStatusById = useMemo(() => {
-    const index = {};
+  // const slotStatusById = useMemo(() => {
+  //   const index = {};
 
-    timeSlots.forEach((slot, arrayIndex) => {
-      index[slot.id] = activeSlotStatuses[arrayIndex] || 'booked';
-    });
+  //   availableSlots.forEach((slot, arrayIndex) => {
+  //     index[slot.id] = activeSlotStatuses[arrayIndex] || 'booked';
+  //   });
 
-    return index;
-  }, [activeSlotStatuses, timeSlots]);
+  //   return index;
+  // }, [activeSlotStatuses, availableSlots]);
 
   useEffect(() => {
     const loadBookingData = async () => {
       try {
         setIsLoadingBookingData(true);
 
-        const [courtsResponse, timeSlotsResponse, pricingsResponse] = await Promise.all([
+        const [courtsResponse, pricingsResponse] = await Promise.all([
           getCourts(),
-          getTimeSlots(),
           getPricings().catch(() => null),
         ]);
 
@@ -359,14 +364,13 @@ function UsersPage() {
           .map(normalizeCourt)
           .filter((court) => Number.isInteger(court.id) && court.id > 0);
 
-        const normalizedTimeSlots = toArray(timeSlotsResponse)
-          .map(normalizeTimeSlot)
-          .filter((slot) => Number.isInteger(slot.id) && slot.id > 0 && slot.range.includes('-'));
+        // const normalizedTimeSlots = toArray(timeSlotsResponse)
+        //   .map(normalizeTimeSlot)
+        //   .filter((slot) => Number.isInteger(slot.id) && slot.id > 0 && slot.range.includes('-'));
 
         const normalizedPricings = extractPricings(pricingsResponse, courtsResponse);
 
         setCourts(normalizedCourts);
-        setTimeSlots(normalizedTimeSlots);
         setPricings(normalizedPricings);
         setSelectedCourtId((previousCourtId) => {
           if (normalizedCourts.some((court) => court.id === previousCourtId)) {
@@ -432,32 +436,71 @@ function UsersPage() {
     checkPhoneBeforeBooking();
   }, [hasToken, navigate]);
 
-  useEffect(() => {
-    const loadOccupiedSlots = async () => {
-      if (!hasToken || !date || !Number.isInteger(Number(selectedCourtId)) || Number(selectedCourtId) <= 0) {
-        setBookingsForDate([]);
-        return;
-      }
+  // useEffect(() => {
+  //   const loadOccupiedSlots = async () => {
+  //     if (!hasToken || !date || !Number.isInteger(Number(selectedCourtId)) || Number(selectedCourtId) <= 0) {
+  //       setBookingsForDate([]);
+  //       return;
+  //     }
 
-      try {
-        setIsLoadingOccupiedSlots(true);
+  //     try {
+  //       setIsLoadingOccupiedSlots(true);
 
-        const bookings = await getMyBookings({
-          bookingDate: date,
-          courtId: selectedCourtId,
-        });
+  //       const bookings = await getMyBookings({
+  //         bookingDate: date,
+  //         courtId: selectedCourtId,
+  //       });
 
-        setBookingsForDate(Array.isArray(bookings) ? bookings : []);
-      } catch {
-        // Keep the booking flow usable when backend has no list endpoint.
-        setBookingsForDate([]);
-      } finally {
-        setIsLoadingOccupiedSlots(false);
-      }
-    };
+  //       setBookingsForDate(Array.isArray(bookings) ? bookings : []);
+  //     } catch {
+  //       // Keep the booking flow usable when backend has no list endpoint.
+  //       setBookingsForDate([]);
+  //     } finally {
+  //       setIsLoadingOccupiedSlots(false);
+  //     }
+  //   };
 
-    loadOccupiedSlots();
-  }, [date, hasToken, selectedCourtId]);
+  //   loadOccupiedSlots();
+  // }, [date, hasToken, selectedCourtId]);
+
+
+
+//timeslot
+useEffect(() => {
+  const fetchAvailable = async () => {
+    if (!date || !selectedCourtId) {
+      setAvailableSlots([]);
+      return;
+    }
+
+    try {
+      const res = await getAvailableTimeSlots({
+        
+        courtId: selectedCourtId,
+        date: date,
+      });
+        console.log("API RESPONSE:", res);
+      const rawSlots = res?.data || [];
+
+      const slots = rawSlots.map((slot) => ({
+        id: slot.id,
+        range: `${slot.start_time.slice(0,5)}-${slot.end_time.slice(0,5)}`,
+        isBooked: slot.isBooked,
+      }));
+    console.log("SLOTS:", slots);
+      setAvailableSlots(slots);
+    } catch (err) {
+      console.error("Fetch available slots error:", err);
+      setAvailableSlots([]);
+    }
+  };
+
+  fetchAvailable();
+}, [date, selectedCourtId]);
+
+
+
+
 
   const handleToggleTimeSlot = (slotId, slotStatus) => {
     if (slotStatus !== 'available') return;
@@ -476,16 +519,16 @@ function UsersPage() {
   const handleConfirmBooking = async () => {
     setErrorMessage('');
     setSuccessMessage('');
-
+   
     if (isPastDate(date)) {
       setErrorMessage('Ngày đặt không được nằm trong quá khứ.');
       return;
     }
 
     const hasBookedSlot = selectedTimeSlotIds.some((slotId) => {
-      const slotStatus = slotStatusById[slotId] || 'booked';
-      return slotStatus !== 'available';
-    });
+  const slot = availableSlots.find(s => s.id === slotId);
+  return slot?.isBooked;
+});
 
     if (hasBookedSlot) {
       setErrorMessage('Có khung giờ đã được đặt. Vui lòng chọn lại các khung giờ trống.');
@@ -574,6 +617,16 @@ function UsersPage() {
           bookingTotal ? ` - Tổng tiền: ${formatCurrency(bookingTotal)}` : ''
         }`
       );
+      
+      setAvailableSlots(prev =>
+        prev.map(slot =>
+          selectedTimeSlotIds.includes(slot.id)
+            ? { ...slot, isBooked: true }
+            : slot
+        )
+      );
+
+
       setSelectedTimeSlotIds([]);
     } catch (error) {
       setErrorMessage(error.message || 'Đặt sân thất bại. Vui lòng thử lại.');
@@ -706,7 +759,7 @@ function UsersPage() {
           {!isLoadingBookingData && isLoadingOccupiedSlots && date && selectedCourt && (
             <p className="form-feedback">Đang đồng bộ trạng thái khung giờ đã đặt...</p>
           )}
-          {!isLoadingBookingData && timeSlots.length === 0 && (
+          {!isLoadingBookingData  && availableSlots.length === 0 &&(
             <p className="form-feedback form-feedback-error">Không có dữ liệu khung giờ khả dụng.</p>
           )}
 
@@ -728,19 +781,19 @@ function UsersPage() {
           <div className="time-table-scroll">
             <div className="time-table">
               <div className="time-cell heading cell-court">Khung giờ</div>
-              {timeSlots.map((slot) => (
+              {availableSlots.map((slot) => (
                 <div
                   key={`${slot.id}-heading`}
                   className="time-cell heading cell-slot"
+
                 >
                   <span>{slot.range}</span>
-                  <small>{slot.period}</small>
                 </div>
               ))}
 
               <div className="time-cell court-name">{selectedCourt?.name || 'Chưa chọn sân'}</div>
-              {timeSlots.map((slot, index) => {
-                const slotStatus = activeSlotStatuses[index] || 'booked';
+              {availableSlots.map((slot) => {
+                const slotStatus = slot.isBooked ? 'booked' : 'available';
                 const isSelected = selectedTimeSlotIds.includes(slot.id);
 
                 return (
@@ -749,8 +802,7 @@ function UsersPage() {
                     key={slot.id}
                     className={`time-cell slot-btn ${slotStatus} ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleToggleTimeSlot(slot.id, slotStatus)}
-                    disabled={slotStatus !== 'available'}
-                    title={slotStatus === 'booked' ? 'Khung giờ đã được đặt' : `Chọn ${slot.range}`}
+                    disabled={slot.isBooked}
                   >
                     {isSelected
                       ? 'Đang chọn'
