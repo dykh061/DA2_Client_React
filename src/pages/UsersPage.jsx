@@ -16,7 +16,11 @@ import { getTimeSlots } from '../services/timeSlotService';
 import { getMyProfile, updateMyProfile } from '../services/userService';
 import { decodeAccessToken, getToken } from '../utils/auth';
 
-const formatCurrency = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
+const formatCurrency = (amount) => {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount)) return '0đ';
+  return `${numericAmount.toLocaleString('vi-VN')}đ`;
+};
 const getPhoneFromUser = (userInput) =>
   String(userInput?.phone_number || userInput?.phoneNumber || userInput?.phone || '').trim();
 
