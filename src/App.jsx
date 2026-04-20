@@ -15,11 +15,8 @@ import MyBookingsPage from "./pages/MyBookingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PricingPage from "./pages/PricingPage";
 import TimeSlotsPage from "./pages/TimeSlotsPage";
-import { FaTachometerAlt } from "react-icons/fa";
 import { restoreSession } from "./services/apiClient";
 import { getToken } from "./utils/auth";
-
-
 
 function App() {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
@@ -111,11 +108,9 @@ function App() {
       <Route
         path="/admin"
         element={
-
           <ProtectedRoute requiredRole="admin">
             <AdminLayout />
           </ProtectedRoute>
-
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
@@ -124,9 +119,7 @@ function App() {
         <Route path="bookings" element={<BookingsPage />} />
         <Route path="timeslots" element={<TimeSlotsPage />} />
         <Route path="customers" element={<CustomerManagement />} />
-
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

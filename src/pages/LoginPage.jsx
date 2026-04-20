@@ -1,29 +1,55 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { login } from "../services/authService";
-import { useNavigate } from "react-router-dom";
-
-import { getUser } from "../utils/auth";
-
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { clearAuthSession, getCurrentUser, getDisplayName, login } from '../services/authService';
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const currentUser = getCurrentUser();
+  const greetingName = getDisplayName(currentUser);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    //Chưa có giao diện báo lỗi
-    //Chưa có kiểm tra nhập mail, password này kia
-    try {
-      await login(email, password);
-      alert("Đăng nhập thành công");
-      navigate("/my-bookings");
-    } catch (err) {
-      alert(err.message);
-    }
+  const handleLogout = () => {
+    clearAuthSession();
+    navigate('/', { replace: true });
   };
 
+  const handleChange = (event) => {
+    const { id, value } = event.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    const email = formData.email.trim();
+    const password = formData.password;
+
+    if (!email || !password) {
+      setErrorMessage('Vui lòng nhập email và mật khẩu.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await login({ email, password });
+      setSuccessMessage('Đăng nhập thành công. Đang chuyển hướng...');
+      setTimeout(() => {
+        navigate('/my-bookings', { replace: true });
+      }, 900);
+    } catch (error) {
+      setErrorMessage(error.message || 'Không thể đăng nhập. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="login-screen">
@@ -53,10 +79,22 @@ function LoginPage() {
           </Link>
         </nav>
 
-        <Link className="menu-link login-link" to="/login">
-          <i className="fa-regular fa-user" aria-hidden="true"></i>
-          Đăng nhập
-        </Link>
+        {currentUser ? (
+          <div className="auth-actions">
+            <Link className="menu-link login-link" to="/my-bookings">
+              <i className="fa-regular fa-user" aria-hidden="true"></i>
+              {`Xin chào ${greetingName}`}
+            </Link>
+            <button type="button" className="menu-link logout-btn" onClick={handleLogout}>
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <main className="login-wrapper">
@@ -68,15 +106,15 @@ function LoginPage() {
           <h1>Đăng nhập</h1>
           <p>Đăng nhập để tiếp tục đặt sân</p>
 
-          <form className="login-form">
+          <form className="login-form" onSubmit={handleSubmit}>
             <label htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
               placeholder="example@email.com"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
             />
 
             <label htmlFor="password">Mật khẩu</label>
@@ -84,16 +122,16 @@ function LoginPage() {
               id="password"
               type="password"
               placeholder="........"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              required
+              value={formData.password}
+              onChange={handleChange}
             />
 
-            <button
-              type="button"
-              className="login-submit-btn"
-              onClick={handleLogin}
-            >
-              Đăng nhập
+            {errorMessage && <p className="form-feedback form-feedback-error">{errorMessage}</p>}
+            {successMessage && <p className="form-feedback form-feedback-success">{successMessage}</p>}
+
+            <button type="submit" className="login-submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 
