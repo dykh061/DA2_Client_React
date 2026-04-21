@@ -295,61 +295,7 @@ function UsersPage() {
       !isCheckingProfile &&
       !isSubmitting
   );
-
-  // const bookedSlotIds = useMemo(() => {
-  //   const selectedDateKey = normalizeDateKey(date);
-  //   const selectedCourtNumber = Number(selectedCourtId);
-  //   const ids = new Set();
-
-  //   if (!selectedDateKey || !Number.isInteger(selectedCourtNumber) || selectedCourtNumber <= 0) {
-  //     return ids;
-  //   }
-
-  //   bookingsForDate.forEach((booking) => {
-  //     const bookingCourtId = Number(booking?.courtId || booking?.court_id || booking?.court?.id);
-  //     const bookingDateKey = normalizeDateKey(
-  //       booking?.bookingDate || booking?.booking_date || booking?.date
-  //     );
-
-  //     if (bookingCourtId !== selectedCourtNumber || bookingDateKey !== selectedDateKey) {
-  //       return;
-  //     }
-
-  //     const slotIds = Array.isArray(booking?.timeSlotIds)
-  //       ? booking.timeSlotIds
-  //       : Array.isArray(booking?.time_slot_ids)
-  //         ? booking.time_slot_ids
-  //         : [];
-
-  //     slotIds.forEach((slotId) => {
-  //       const normalizedSlotId = Number(slotId);
-  //       if (Number.isInteger(normalizedSlotId) && normalizedSlotId > 0) {
-  //         ids.add(normalizedSlotId);
-  //       }
-  //     });
-  //   });
-
-  //   return ids;
-  // }, [bookingsForDate, date, selectedCourtId]);
-
-  // const activeSlotStatuses = useMemo(() => {
-  //   if (!selectedCourt || selectedCourt.status !== 'available') {
-  //     return availableSlots.map(() => 'booked');
-  //   }
-
-  //   return availableSlots.map((slot) => (bookedSlotIds.has(slot.id) ? 'booked' : 'available'));
-  // }, [bookedSlotIds, selectedCourt, availableSlots]);
-
-  // const slotStatusById = useMemo(() => {
-  //   const index = {};
-
-  //   availableSlots.forEach((slot, arrayIndex) => {
-  //     index[slot.id] = activeSlotStatuses[arrayIndex] || 'booked';
-  //   });
-
-  //   return index;
-  // }, [activeSlotStatuses, availableSlots]);
-
+//
   useEffect(() => {
     const loadBookingData = async () => {
       try {

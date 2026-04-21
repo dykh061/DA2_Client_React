@@ -28,7 +28,7 @@ const requestJson = async (url, options, fallbackMessage) => {
 
 
 export const getAvailableTimeSlots = async ({ courtId, date }) => {
-  const url = `${API_ENDPOINTS.BOOKINGS}availability?courtId=${courtId}&date=${date}`;
+  const url = `${API_ENDPOINTS.BOOKINGS}/availability?courtId=${courtId}&date=${date}`;
   return requestJson(
     url,
     {

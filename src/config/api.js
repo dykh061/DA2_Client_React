@@ -33,7 +33,7 @@ export const API_ENDPOINTS = {
   USER_ME: `${BASE_URL}/users/me`,
   USER_BY_ID: (id) => `${BASE_URL}/users/${id}`,
   BOOKINGS_HISTORY: `${BASE_URL}/bookings/my-bookings`,
-  CREATE_BOOKING: `${BASE_URL}/bookings`,
+  BOOKINGS: `${BASE_URL}/bookings`,
 };
 
 export { DEFAULT_API_URL };

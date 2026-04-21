@@ -71,7 +71,7 @@ export const clearCachedBookings = () => {
 
 export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 'NORMAL' }) => {
   return requestJson(
-    API_ENDPOINTS.CREATE_BOOKING,
+    API_ENDPOINTS.BOOKINGS,
     {
       method: 'POST',
       headers: {
