@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from '../config/api';
 import { getAuthHeaders } from './authService';
 
-const TIME_HH_MM_OR_HH_MM_SS = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/;
 
 const parseErrorMessage = async (res, fallbackMessage) => {
   try {

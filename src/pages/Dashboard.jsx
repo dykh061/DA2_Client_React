@@ -10,8 +10,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalBills: 0,
-    occupancyRate: 0,
-    peakHours: [],
+    // occupancyRate: 0,
+    // peakHours: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,8 +27,8 @@ const Dashboard = () => {
       setStats({
         totalRevenue: data?.totalRevenue || 0,
         totalBills: data?.totalBills || 0,
-        occupancyRate:  0,
-        peakHours:  [],
+        // occupancyRate:  0,
+        // peakHours:  [],
       });
     } catch (err) {
       console.error( err);
@@ -48,23 +48,23 @@ const Dashboard = () => {
       color: "success",
       trend: `${stats.totalBills} hóa đơn`,
     },
-    {
-      title: "Tỷ lệ lấp đầy",
-      value: `${stats.occupancyRate || 0}%`,
-      icon: <FaChartPie />,
-      color: "primary",
-      trend: "Hiệu suất sân",
-    },
-    {
-      title: "Giờ cao điểm",
-      value:
-        stats.peakHours.length > 0
-          ? stats.peakHours.join(", ")
-          : "Chưa có dữ liệu",
-      icon: <FaClock />,
-      color: "warning",
-      trend: "Khung giờ vàng",
-    },
+    // {
+    //   title: "Tỷ lệ lấp đầy",
+    //   value: `${stats.occupancyRate || 0}%`,
+    //   icon: <FaChartPie />,
+    //   color: "primary",
+    //   trend: "Hiệu suất sân",
+    // },
+    // {
+    //   title: "Giờ cao điểm",
+    //   value:
+    //     stats.peakHours.length > 0
+    //       ? stats.peakHours.join(", ")
+    //       : "Chưa có dữ liệu",
+    //   icon: <FaClock />,
+    //   color: "warning",
+    //   trend: "Khung giờ vàng",
+    // },
   ];
 
   // ================= UI =================
