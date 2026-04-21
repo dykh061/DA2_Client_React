@@ -33,9 +33,7 @@ export const getAvailableTimeSlots = async ({ courtId, date }) => {
     url,
     {
       method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-      },
+      headers: getAuthHeaders(),
     },
     'Không thể lấy danh sách khung giờ khả dụng'
   );

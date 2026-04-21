@@ -115,7 +115,7 @@ function App() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="courts" element={<CourtsPage />} />
-        <Route path="pricing" element={<PricingPage />} />
+        {/* <Route path="pricing" element={<PricingPage />} /> */}
         <Route path="bookings" element={<BookingsPage />} />
         <Route path="timeslots" element={<TimeSlotsPage />} />
         <Route path="customers" element={<CustomerManagement />} />{" "}

@@ -24,7 +24,6 @@ const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
           <tr>
             <th className="ps-4 py-3">ID</th>
             <th>Khách hàng</th>
-            <th>Sân</th>
             <th>Thời gian</th>
             <th>Trạng thái</th>
             <th className="text-end pe-4">Thao tác</th>
@@ -41,11 +40,7 @@ const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
 
                 <td className="fw-bold">{b.name}</td>
 
-                <td>
-                  <Badge bg="light" text="dark" className="border">
-                    {b.court}
-                  </Badge>
-                </td>
+               
 
                 <td>
                   <div className="small">{b.date}</div>

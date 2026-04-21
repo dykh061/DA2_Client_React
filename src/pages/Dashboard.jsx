@@ -17,29 +17,20 @@ const Dashboard = () => {
 
   // ================= API =================
   useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get("/api/bookings/statistics");
+  const fetchStats = async () => {
+    setLoadingStats(true);
+    try {
+      const data = await getBookingStatistics();
+      setStats(data);
+    } catch (err) {
+      console.error("Stats error:", err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
-        const data = res.data || {};
-
-        setStats({
-          totalRevenue: data.totalRevenue || 0,
-          totalBills: data.totalBills || 0,
-          occupancyRate: data.occupancyRate || 0,
-          peakHours: data.peakHours || [],
-        });
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
+  fetchStats();
+}, []);
   // ================= FORMAT STATS =================
   const statsDisplay = [
     {

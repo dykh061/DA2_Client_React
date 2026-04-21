@@ -28,47 +28,6 @@ const requestJson = async (url, options, fallbackMessage) => {
   return res.json();
 };
 
-
-
-// export const getMyBookings = async ({ bookingDate, courtId } = {}) => {
-//   const query = {
-//     bookingDate,
-//     date: bookingDate,
-//     courtId,
-//     court_id: courtId,
-//   };
-// }
-
-const getBookingCache = () => {
-  const raw = localStorage.getItem(BOOKING_CACHE_KEY);
-  if (!raw) return [];
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-export const getCachedBookings = () => {
-  return getBookingCache();
-};
-
-export const saveCachedBooking = (booking) => {
-  if (!booking || typeof booking !== 'object') return;
-
-  const current = getBookingCache();
-  const next = [booking, ...current].slice(0, 100);
-  localStorage.setItem(BOOKING_CACHE_KEY, JSON.stringify(next));
-};
-
-export const clearCachedBookings = () => {
-  localStorage.removeItem(BOOKING_CACHE_KEY);
-};
-
-
-
 export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 'NORMAL' }) => {
   return requestJson(
     API_ENDPOINTS.BOOKINGS,
@@ -94,13 +53,38 @@ export const getMyBookings = async () => {
     API_ENDPOINTS.BOOKINGS_HISTORY,
     {
       method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-      },
+      headers: getAuthHeaders(),
+
     },
     'Không thể lấy lịch sử đặt sân'
   );
 
   // backend trả { success, data: [...] }
   return Array.isArray(res?.data) ? res.data : [];
+};
+
+export const getAllBookings = async () => {
+  const res = await requestJson(API_ENDPOINTS.BOOKINGS, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  },
+  'Không thể lấy danh sách tất cả booking'
+);
+
+ 
+  return Array.isArray(res?.data) ? res.data : [];
+};
+
+export const getBookingStatistics = async () => {
+  const res = await requestJson(
+    `${API_ENDPOINTS.BOOKINGS}/statistics`,
+    {
+      method: "GET",
+      headers: getAuthHeaders(),
+    },
+    "Không thể lấy thống kê"
+  );
+
+  // res = { success, data }
+  return res?.data || { totalBills: 0, totalRevenue: 0 };
 };

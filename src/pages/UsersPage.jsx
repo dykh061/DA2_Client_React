@@ -9,7 +9,7 @@ import {
   savePreferredPhoneNumber,
   saveCurrentUser,
 } from '../services/authService';
-import { createBooking, getMyBookings, saveCachedBooking } from '../services/bookingService';
+import { createBooking } from '../services/bookingService';
 import { getCourts } from '../services/courtService';
 import { getPricings } from '../services/pricingService';
 import { getMyProfile, updateMyProfile } from '../services/userService';
@@ -33,21 +33,6 @@ const getTodayLocalDateInputValue = () => {
   return localDate.toISOString().split('T')[0];
 };
 
-const normalizeDateKey = (value) => {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-
-  const matched = raw.match(/\d{4}-\d{2}-\d{2}/);
-  if (matched) return matched[0];
-
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return '';
-
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, '0');
-  const day = String(parsed.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 const toArray = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -110,19 +95,6 @@ const getPeriodFromHour = (hour) => {
   return 'tối';
 };
 
-const normalizeTimeSlot = (slot) => {
-  const id = Number(slot?.id);
-  const start = String(slot?.start_time || '').slice(0, 5);
-  const end = String(slot?.end_time || '').slice(0, 5);
-  const startHour = Number((start || '00:00').split(':')[0]);
-
-  return {
-    id,
-    range: `${start}-${end}`,
-    period: getPeriodFromHour(Number.isFinite(startHour) ? startHour : 0),
-  };
-};
-
 const normalizeCourtStatus = (statusValue) => {
   const rawStatus = String(statusValue || '').trim().toLowerCase();
 
@@ -182,7 +154,6 @@ function UsersPage() {
   const [date, setDate] =  useState(getTodayLocalDateInputValue());
   const [courts, setCourts] = useState([]);
   const [pricings, setPricings] = useState([]);
-  const [bookingsForDate, setBookingsForDate] = useState([]);
   const [selectedCourtId, setSelectedCourtId] = useState(1);
   const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState([]);
   const [customerName, setCustomerName] = useState('');
@@ -380,7 +351,7 @@ function UsersPage() {
     };
 
     checkPhoneBeforeBooking();
-  }, [hasToken, navigate]);
+  }, [hasToken, navigate, currentUser]);
 
 
 //timeslot
@@ -503,40 +474,21 @@ useEffect(() => {
       const selectedTimeRangesSnapshot = [...selectedTimes];
       const nowIso = new Date().toISOString();
 
-      saveCachedBooking({
-        bookingId: bookingData?.bookingId || `BK-${Date.now()}`,
-        bookingDate: date,
-        courtName: selectedCourt?.name || '',
-        timeRanges: selectedTimeRangesSnapshot,
-        totalAmount: Number.isFinite(bookingTotal) ? bookingTotal : totalAmount,
-        phoneNumber: phoneNumber.trim(),
-        userEmail: String((getCurrentUser() || currentUser || {})?.email || '')
-          .trim()
-          .toLowerCase(),
-        createdAt: nowIso,
-      });
+     
 
-      setBookingsForDate((previousBookings) => [
-        {
-          bookingId: bookingData?.bookingId || `BK-${Date.now()}`,
-          bookingDate: date,
-          courtId: selectedCourtId,
-          courtName: selectedCourt?.name || '',
-          timeSlotIds: bookedSlotIdsSnapshot,
-          timeRanges: selectedTimeRangesSnapshot,
-          totalAmount: Number.isFinite(bookingTotal) ? bookingTotal : totalAmount,
-          createdAt: nowIso,
-        },
-        ...previousBookings,
-      ]);
-
+      
       setSuccessMessage(
         `Đặt lịch thành công! Mã đơn: ${bookingData?.bookingId || 'N/A'}${
           bookingTotal ? ` - Tổng tiền: ${formatCurrency(bookingTotal)}` : ''
         }`
       );
       
-      setAvailableSlots(prev =>
+     
+
+      setSelectedTimeSlotIds([]);
+
+
+       setAvailableSlots(prev =>
         prev.map(slot =>
           selectedTimeSlotIds.includes(slot.id)
             ? { ...slot, isBooked: true }
@@ -544,8 +496,6 @@ useEffect(() => {
         )
       );
 
-
-      setSelectedTimeSlotIds([]);
     } catch (error) {
       setErrorMessage(error.message || 'Đặt sân thất bại. Vui lòng thử lại.');
     } finally {
@@ -655,6 +605,7 @@ useEffect(() => {
                   onClick={() => {
                     setSelectedCourtId(court.id);
                     setSelectedTimeSlotIds([]);
+                    setAvailableSlots([]);
                   }}
                   disabled={isLoadingBookingData}
                 >

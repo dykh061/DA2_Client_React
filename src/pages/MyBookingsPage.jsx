@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, getCurrentUser, getDisplayName } from '../services/authService';
-import { getCachedBookings, getMyBookings } from '../services/bookingService';
+import { getMyBookings } from '../services/bookingService';
 import { decodeAccessToken, getToken } from '../utils/auth';
 
 const formatCurrency = (amount) => {
@@ -17,27 +17,7 @@ const formatDate = (dateString) => {
   return parsed.toLocaleDateString('vi-VN');
 };
 
-const formatSlotLabel = (booking) => {
-  const timeRanges = Array.isArray(booking?.timeRanges)
-    ? booking.timeRanges.map((value) => String(value || '').trim()).filter(Boolean)
-    : [];
 
-  if (timeRanges.length) {
-    return timeRanges.join(', ');
-  }
-
-  const timeSlotIds = Array.isArray(booking?.timeSlotIds)
-    ? booking.timeSlotIds
-        .map((value) => Number(value))
-        .filter((value) => Number.isInteger(value) && value > 0)
-    : [];
-
-  if (timeSlotIds.length) {
-    return timeSlotIds.map((slotId) => `Slot ${slotId}`).join(', ');
-  }
-
-  return 'N/A';
-};
 
 
 
@@ -46,7 +26,6 @@ function MyBookingsPage() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
   const greetingName = getDisplayName(currentUser);
-  const normalizedCurrentEmail = String(currentUser?.email || '').trim().toLowerCase();
   const [remoteBookings, setRemoteBookings] = useState([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -54,21 +33,8 @@ function MyBookingsPage() {
   const isAdmin = tokenPayload?.role === 'admin';
   const profilePath = isAdmin ? '/admin/profile' : '/profile-user';
 
-
-  const cachedBookings = useMemo(() => {
-    return getCachedBookings().filter((booking) => {
-      if (!normalizedCurrentEmail) return true;
-      return String(booking?.userEmail || '').trim().toLowerCase() === normalizedCurrentEmail;
-    });
-  }, [normalizedCurrentEmail]);
-
-  const myBookings = useMemo(() => {
-    if (remoteBookings.length > 0) {
-      return remoteBookings;
-    }
-    return cachedBookings;
-  }, [cachedBookings, remoteBookings]);
-
+  const myBookings = remoteBookings;
+ 
   useEffect(() => {
     let isMounted = true;
 
@@ -80,18 +46,9 @@ function MyBookingsPage() {
         const bookings = await getMyBookings();
         if (!isMounted) return;
 
-        const normalizedBookings = (Array.isArray(bookings) ? bookings : []).filter((booking) => {
-          if (!normalizedCurrentEmail) return true;
+        setRemoteBookings(Array.isArray(bookings) ? bookings : []);
 
-          const bookingEmail = String(booking?.userEmail || '')
-            .trim()
-            .toLowerCase();
 
-          // Some backends do not return email in booking payload, keep those entries.
-          return !bookingEmail || bookingEmail === normalizedCurrentEmail;
-        });
-
-        setRemoteBookings(normalizedBookings);
       } catch (error) {
         if (!isMounted) return;
         setLoadError(error.message || 'Không thể tải lịch đặt từ hệ thống.');
@@ -108,7 +65,7 @@ function MyBookingsPage() {
     return () => {
       isMounted = false;
     };
-  }, [normalizedCurrentEmail]);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -180,7 +137,7 @@ function MyBookingsPage() {
         {!isLoadingBookings && loadError && myBookings.length > 0 && (
           <section className="booking-card">
             <p className="form-feedback form-feedback-error">
-              Không thể đồng bộ đầy đủ dữ liệu mới nhất. Đang hiển thị dữ liệu đã lưu gần đây.
+              {loadError && <p className="form-feedback form-feedback-error">{loadError}</p>}
             </p>
           </section>
         )}
