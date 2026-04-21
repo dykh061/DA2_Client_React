@@ -436,34 +436,6 @@ function UsersPage() {
     checkPhoneBeforeBooking();
   }, [hasToken, navigate]);
 
-  // useEffect(() => {
-  //   const loadOccupiedSlots = async () => {
-  //     if (!hasToken || !date || !Number.isInteger(Number(selectedCourtId)) || Number(selectedCourtId) <= 0) {
-  //       setBookingsForDate([]);
-  //       return;
-  //     }
-
-  //     try {
-  //       setIsLoadingOccupiedSlots(true);
-
-  //       const bookings = await getMyBookings({
-  //         bookingDate: date,
-  //         courtId: selectedCourtId,
-  //       });
-
-  //       setBookingsForDate(Array.isArray(bookings) ? bookings : []);
-  //     } catch {
-  //       // Keep the booking flow usable when backend has no list endpoint.
-  //       setBookingsForDate([]);
-  //     } finally {
-  //       setIsLoadingOccupiedSlots(false);
-  //     }
-  //   };
-
-  //   loadOccupiedSlots();
-  // }, [date, hasToken, selectedCourtId]);
-
-
 
 //timeslot
 useEffect(() => {

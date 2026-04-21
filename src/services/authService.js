@@ -57,10 +57,13 @@ export const login = async ({ email, password } = {}) => {
 
   const accessToken = extractAccessToken(data);
   if (!accessToken) {
+
     throw new Error('Đăng nhập thành công nhưng backend chưa trả access token đúng format.');
   }
 
   markLoggedIn(accessToken, data?.user || null);
+  console.log("LOGIN RESPONSE:", data);
+  console.log("TOKEN:", accessToken);
   return data;
 };
 
@@ -72,6 +75,7 @@ export const extractAccessToken = (payload) => {
   if (!payload || typeof payload !== 'object') return '';
 
   return (
+    payload?.data?.accessToken||
     payload?.tokens?.accessToken ||
     payload?.tokens?.access_token ||
     payload?.accessToken ||

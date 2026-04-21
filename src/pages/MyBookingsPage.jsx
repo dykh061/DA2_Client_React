@@ -39,6 +39,9 @@ const formatSlotLabel = (booking) => {
   return 'N/A';
 };
 
+
+
+
 function MyBookingsPage() {
   const navigate = useNavigate();
   const currentUser = getCurrentUser();
@@ -50,6 +53,7 @@ function MyBookingsPage() {
   const tokenPayload = decodeAccessToken(getToken());
   const isAdmin = tokenPayload?.role === 'admin';
   const profilePath = isAdmin ? '/admin/profile' : '/profile-user';
+
 
   const cachedBookings = useMemo(() => {
     return getCachedBookings().filter((booking) => {
