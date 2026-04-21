@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card } from "react-bootstrap";
 import { FaMoneyBillWave, FaChartPie, FaClock } from "react-icons/fa";
+import { getBookingStatistics } from "../services/bookingService.js";
 import axios from "axios";
 
 const Dashboard = () => {
@@ -18,14 +19,21 @@ const Dashboard = () => {
   // ================= API =================
   useEffect(() => {
   const fetchStats = async () => {
-    setLoadingStats(true);
+    setLoading(true);
     try {
-      const data = await getBookingStatistics();
-      setStats(data);
+      const data= await getBookingStatistics();
+
+      // const data = res?.data || res || {};
+      setStats({
+        totalRevenue: data?.totalRevenue || 0,
+        totalBills: data?.totalBills || 0,
+        occupancyRate:  0,
+        peakHours:  [],
+      });
     } catch (err) {
-      console.error("Stats error:", err);
+      console.error( err);
     } finally {
-      setLoadingStats(false);
+      setLoading(false);
     }
   };
 
