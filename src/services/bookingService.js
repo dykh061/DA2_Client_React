@@ -30,14 +30,14 @@ const requestJson = async (url, options, fallbackMessage) => {
 
 
 
-export const getMyBookings = async ({ bookingDate, courtId } = {}) => {
-  const query = {
-    bookingDate,
-    date: bookingDate,
-    courtId,
-    court_id: courtId,
-  };
-}
+// export const getMyBookings = async ({ bookingDate, courtId } = {}) => {
+//   const query = {
+//     bookingDate,
+//     date: bookingDate,
+//     courtId,
+//     court_id: courtId,
+//   };
+// }
 
 const getBookingCache = () => {
   const raw = localStorage.getItem(BOOKING_CACHE_KEY);
@@ -71,7 +71,7 @@ export const clearCachedBookings = () => {
 
 export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 'NORMAL' }) => {
   return requestJson(
-    API_ENDPOINTS.BOOKINGS,
+    API_ENDPOINTS.CREATE_BOOKING,
     {
       method: 'POST',
       headers: {
@@ -87,4 +87,20 @@ export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 
     },
     'Không thể đặt sân'
   );
+};
+
+export const getMyBookings = async () => {
+  const res = await requestJson(
+    API_ENDPOINTS.BOOKINGS_HISTORY,
+    {
+      method: 'GET',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    },
+    'Không thể lấy lịch sử đặt sân'
+  );
+
+  // backend trả { success, data: [...] }
+  return Array.isArray(res?.data) ? res.data : [];
 };

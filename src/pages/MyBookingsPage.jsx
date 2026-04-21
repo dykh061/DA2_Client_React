@@ -204,14 +204,16 @@ function MyBookingsPage() {
               {myBookings.map((booking) => (
                 <article
                   className="admin-user-item"
-                  key={`${booking.bookingId || 'booking'}-${booking.createdAt || booking.bookingDate}`}
+                  key={`${booking.id}`}
                 >
-                  <strong>{`Mã đơn: ${booking.bookingId}`}</strong>
-                  <p>{`Ngày đặt: ${formatDate(booking.bookingDate)}`}</p>
-                  <p>{`Sân: ${booking.courtName || 'N/A'}`}</p>
-                  <p>{`Khung giờ: ${formatSlotLabel(booking)}`}</p>
-                  <p>{`Số điện thoại: ${booking.phoneNumber || 'N/A'}`}</p>
-                  <p>{`Tổng tiền: ${formatCurrency(booking.totalAmount)}`}</p>
+                  <strong>{`Mã đơn: ${booking.id}`}</strong>
+                  <p>{`Ngày đặt: ${formatDate(booking.created_at)}`}</p>
+                  {/* <p>{`Sân: ${booking.courtName || 'N/A'}`}</p> */}
+                  {/* <p>{`Khung giờ: ${formatSlotLabel(booking)}`}</p> */}
+                  {/* <p>{`Số điện thoại: ${booking.phoneNumber || 'N/A'}`}</p> */}
+                  <p>{`Tổng tiền: ${formatCurrency(booking.total_price)}`}</p>
+                  <p>{`Trạng thái: ${booking.status}`}</p>
+                  <p>{`Thanh toán: ${booking.payment_status}`}</p>
                 </article>
               ))}
             </div>

@@ -32,7 +32,7 @@ export const API_ENDPOINTS = {
   USERS_ALL: `${BASE_URL}/users/`,
   USER_ME: `${BASE_URL}/users/me`,
   USER_BY_ID: (id) => `${BASE_URL}/users/${id}`,
-  BOOKINGS: `${BASE_URL}/bookings/`,
+  BOOKINGS_HISTORY: `${BASE_URL}/bookings/my-bookings`,
   CREATE_BOOKING: `${BASE_URL}/bookings`,
 };
 
