@@ -1,33 +1,78 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { clearAuthSession, getCurrentUser, getDisplayName } from '../services/authService';
+import { getCourts } from '../services/courtService';
 
-const homeCourts = [
-  {
-    id: 1,
-    name: "Sân 1",
-    price: "50.000đ/giờ",
-    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
-    image:
-      "https://qvbadminton.com/wp-content/uploads/2024/11/alt-text-mo-ta-hinh-anh-san-cau-long-dong-phuong-quan-2-rong-rai-thoang-mat-d9639f6a.webp",
-  },
-  {
-    id: 2,
-    name: "Sân 2",
-    price: "50.000đ/giờ",
-    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
-    image:
-      "https://tuanvisport.com.vn/wp-content/uploads/2024/02/Thi-cong-san-cau-long.jpg",
-  },
-  {
-    id: 3,
-    name: "Sân 3",
-    price: "50.000đ/giờ",
-    description: "Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng",
-    image:
-      "https://babolat.com.vn/wp-content/uploads/2023/11/san-danh-cau-long-binh-trieu.jpg",
-  },
-];
+const DEFAULT_COURT_IMAGE =
+  'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1600&q=80';
+
+const formatCourtPrice = (pricings) => {
+  const prices = (Array.isArray(pricings) ? pricings : [])
+    .map((pricing) => Number(pricing?.price))
+    .filter((price) => Number.isFinite(price) && price >= 0);
+
+  if (!prices.length) return 'Liên hệ';
+
+  return `${Math.min(...prices).toLocaleString('vi-VN')}đ/giờ`;
+};
+
+const mapCourtToCard = (court) => {
+  const status = String(court?.status || '').trim().toLowerCase();
+
+  return {
+    id: Number(court?.id),
+    name: String(court?.name || 'Sân cầu lông').trim(),
+    price: formatCourtPrice(court?.pricings),
+    description:
+      status === 'maintenance'
+        ? 'Sân đang bảo trì, vui lòng chọn sân khác hoặc quay lại sau.'
+        : 'Sân tiêu chuẩn, ánh sáng tốt, phù hợp cho mọi đối tượng.',
+    image: Array.isArray(court?.imageUrls) && court.imageUrls.length ? court.imageUrls[0] : DEFAULT_COURT_IMAGE,
+  };
+};
+
+const toArray = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+};
 
 function HomePage() {
+  const navigate = useNavigate();
+  const [homeCourts, setHomeCourts] = useState([]);
+  const [isLoadingCourts, setIsLoadingCourts] = useState(true);
+  const [courtsError, setCourtsError] = useState('');
+  const currentUser = getCurrentUser();
+  const greetingName = getDisplayName(currentUser);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    navigate('/', { replace: true });
+  };
+
+  useEffect(() => {
+    const loadCourts = async () => {
+      try {
+        setIsLoadingCourts(true);
+        setCourtsError('');
+
+        const response = await getCourts();
+        const normalizedCourts = toArray(response)
+          .map(mapCourtToCard)
+          .filter((court) => Number.isInteger(court.id) && court.id > 0);
+
+        setHomeCourts(normalizedCourts);
+      } catch (error) {
+        setCourtsError(error.message || 'Không thể tải danh sách sân.');
+        setHomeCourts([]);
+      } finally {
+        setIsLoadingCourts(false);
+      }
+    };
+
+    loadCourts();
+  }, []);
+
   return (
     <div className="home-screen">
       <header className="booking-nav home-nav">
@@ -55,6 +100,23 @@ function HomePage() {
             <span>Lịch của tôi</span>
           </Link>
         </nav>
+
+        {currentUser ? (
+          <div className="auth-actions">
+            <Link className="menu-link login-link" to="/my-bookings">
+              <i className="fa-regular fa-user" aria-hidden="true"></i>
+              {`Xin chào ${greetingName}`}
+            </Link>
+            <button type="button" className="menu-link logout-btn" onClick={handleLogout}>
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
+          <Link className="menu-link login-link" to="/login">
+            <i className="fa-regular fa-user" aria-hidden="true"></i>
+            Đăng nhập
+          </Link>
+        )}
       </header>
 
       <section className="home-hero">
@@ -77,9 +139,9 @@ function HomePage() {
               Đặt sân ngay{" "}
               <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </Link>
-            <a href="#" className="home-btn-secondary">
+            <Link to="/my-bookings" className="home-btn-secondary">
               Xem lịch đặt
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -92,20 +154,28 @@ function HomePage() {
 
       <section className="home-courts-section">
         <h2>Hệ thống sân</h2>
-        <div className="home-courts-grid">
-          {homeCourts.map((court) => (
-            <article key={court.id} className="home-court-card">
-              <img src={court.image} alt={court.name} />
-              <div className="home-court-content">
-                <div className="home-court-header">
-                  <h3>{court.name}</h3>
-                  <strong>{court.price}</strong>
+        {isLoadingCourts ? (
+          <p className="form-feedback">Đang tải danh sách sân...</p>
+        ) : homeCourts.length === 0 ? (
+          <p className="form-feedback form-feedback-error">
+            {courtsError || 'Hiện chưa có dữ liệu sân khả dụng.'}
+          </p>
+        ) : (
+          <div className="home-courts-grid">
+            {homeCourts.map((court) => (
+              <article key={court.id} className="home-court-card">
+                <img src={court.image} alt={court.name} />
+                <div className="home-court-content">
+                  <div className="home-court-header">
+                    <h3>{court.name}</h3>
+                    <strong>{court.price}</strong>
+                  </div>
+                  <p>{court.description}</p>
                 </div>
-                <p>{court.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="home-cta">

@@ -14,16 +14,26 @@ const BASE_URL = import.meta.env.DEV
   : normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 export const API_ENDPOINTS = {
-  USERS: `${BASE_URL}/users`,
-  USER_BY_ID: (id) => `${BASE_URL}/users/${id}`,
-  USER_ME: `${BASE_URL}/users/me`,
+  AUTH_REGISTER: `${BASE_URL}/auth/register`,
+  AUTH_LOGIN: `${BASE_URL}/auth/login`,
   AUTH: {
     REGISTER: `${BASE_URL}/auth/register`,
     LOGIN: `${BASE_URL}/auth/login`,
     LOGOUT: `${BASE_URL}/auth/logout`,
     REFRESH: `${BASE_URL}/auth/refresh`,
   },
-  CREATE_BOOKING: `${BASE_URL}/bookings`,
+  COURTS: `${BASE_URL}/courts`,
+  COURT_BY_ID: (id) => `${BASE_URL}/courts/${id}`,
+  TIME_SLOTS: `${BASE_URL}/time-slots`,
+  TIME_SLOT_BY_ID: (id) => `${BASE_URL}/time-slots/${id}`,
+  PRICINGS: `${BASE_URL}/pricings`,
+  PRICING_BY_ID: (id) => `${BASE_URL}/pricings/${id}`,
+  USERS: `${BASE_URL}/users`,
+  USERS_ALL: `${BASE_URL}/users/`,
+  USER_ME: `${BASE_URL}/users/me`,
+  USER_BY_ID: (id) => `${BASE_URL}/users/${id}`,
+  BOOKINGS_HISTORY: `${BASE_URL}/bookings/my-bookings`,
+  BOOKINGS: `${BASE_URL}/bookings`,
 };
 
 export { DEFAULT_API_URL };

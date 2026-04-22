@@ -20,13 +20,39 @@ const AdminLayout = () => {
   const [user, setUser] = React.useState(null);
   const currentUser = user?.data ?? user ?? null;
   const menuItems = [
-    { title: "Dashboard", path: "/admin/dashboard", icon: <FaTachometerAlt /> },
-    { title: "Người dùng", path: "/admin/customers", icon: <FaUsers /> },
-    { title: "Quản lý Sân", path: "/admin/courts", icon: <FaTableTennis /> },
-    { title: "Đặt sân", path: "../my-bookings", icon: <FaCalendarAlt /> },
-    { title: "Lịch sử", path: "/admin/history", icon: <FaHistory /> },
-    { title: "Đánh giá", path: "/admin/reviews", icon: <FaStar /> },
-  ];
+
+
+  {
+    title: "Dashboard",
+    path: "/admin/dashboard",
+    icon: <FaTachometerAlt />,
+  },
+  {
+    title: "Quản lý sân",
+    path: "/admin/courts",
+    icon: <FaTableTennis />,
+  },
+  // {
+  //   title: "Quản lý giá sân",
+  //   path: "/admin/pricing",
+  //   icon: <FaCalendarAlt />,
+  // },
+  {
+    title: "Quản lý đơn hàng",
+    path: "/admin/bookings",
+    icon: <FaCalendarAlt />,
+  },
+  {
+    title: "Quản lý khung giờ",
+    path: "/admin/timeslots",
+    icon: <FaStar />,
+  },
+  {
+    title: "Người dùng",
+    path: "/admin/customers",
+    icon: <FaUsers />,
+  },
+];
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,8 +60,10 @@ const AdminLayout = () => {
         const data = await getUser();
         setUser(data);
       } catch (err) {
+        console.log(err);
         alert(err.message);
         navigate("../login");
+       
       }
     };
 
@@ -46,6 +74,8 @@ const AdminLayout = () => {
     await logout();
     navigate("/login");
   };
+
+
   return (
     <div className="admin-wrapper">
       {/* SIDEBAR */}
@@ -59,7 +89,7 @@ const AdminLayout = () => {
 
         <Nav className="flex-column sidebar-nav">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname.startsWith(item.path);
             return (
               <Nav.Link
                 as={Link}
@@ -105,7 +135,7 @@ const AdminLayout = () => {
                     <span className="user-name">
                       {currentUser?.username || ""}
                     </span>
-                    {/* <span className="user-role">Administrator</span> */}
+                    <span className="user-role">Administrator</span>
                   </div>
                   <div className="avatar-wrapper">
                     <Image
@@ -142,3 +172,4 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
+

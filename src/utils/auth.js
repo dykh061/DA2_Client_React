@@ -6,6 +6,7 @@ const COOKIE_NAMES = ["refreshToken", "accessToken", "token"];
 
 export const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
+
 const normalizeToken = (token) => {
   if (!token || typeof token !== "string") return null;
   const trimmed = token.trim();
@@ -94,5 +95,4 @@ export const markLoggedIn = (token, user) => {
   setUser(user);
   window.dispatchEvent(new Event("auth:login"));
 };
-
 export const logout = clearSession;

@@ -10,6 +10,7 @@ function ProtectedRoute({ children, requiredRole = null }) {
   }
 
   if (requiredRole) {
+    
     const payload = decodeAccessToken(token);
 
     if (!payload || payload.role !== requiredRole) {
@@ -21,3 +22,5 @@ function ProtectedRoute({ children, requiredRole = null }) {
 }
 
 export default ProtectedRoute;
+
+

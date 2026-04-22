@@ -1,56 +1,196 @@
-import { API_ENDPOINTS } from "../config/api";
-import { logoutSession, publicRequest } from "./apiClient";
-import { markLoggedIn } from "../utils/auth";
+import { API_ENDPOINTS } from '../config/api';
+import { apiRequest, logoutSession, publicRequest } from './apiClient';
+import {
+  clearSession,
+  getToken,
+  setToken,
+  getUser,
+  setUser,
+  markLoggedIn,
+} from '../utils/auth';
 
-const extractAccessToken = (data) =>
-  data?.accessToken || data?.tokens?.accessToken || null;
+const FULL_NAME_MAP_KEY = 'preferred_full_names';
+const PHONE_MAP_KEY = 'preferred_phone_numbers';
 
-const extractAuthPayload = (data) => {
-  const accessToken = extractAccessToken(data);
-  const user = data?.user || null;
+// ── API calls ────────────────────────────────────────────────────────────────
 
-  if (!accessToken) {
-    throw new Error("API auth khong tra ve accessToken");
-  }
-
-  return { accessToken, user };
-};
-
-export const register = async (email, password, options = {}) => {
-  const { autoLogin = true } = options;
+export const register = async ({ email, password, fullName, username, phoneNumber } = {}) => {
+  const payload = {
+    email,
+    password,
+    fullName,
+    fullname: fullName,
+    username,
+    phoneNumber,
+    phone: phoneNumber,
+    phone_number: phoneNumber,
+  };
 
   const data = await publicRequest(
     API_ENDPOINTS.AUTH.REGISTER,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     },
-    "Dang ky that bai",
+    'Đăng ký thất bại',
   );
 
-  if (autoLogin) {
-    const { accessToken, user } = extractAuthPayload(data);
-    markLoggedIn(accessToken, user);
+  const accessToken = extractAccessToken(data);
+  if (accessToken) {
+    markLoggedIn(accessToken, data?.user || null);
   }
 
   return data;
 };
 
-export const login = async (email, password) => {
+export const login = async ({ email, password } = {}) => {
   const data = await publicRequest(
     API_ENDPOINTS.AUTH.LOGIN,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     },
-    "Dang nhap that bai",
+    'Đăng nhập thất bại',
   );
 
-  const { accessToken, user } = extractAuthPayload(data);
-  markLoggedIn(accessToken, user);
+  const accessToken = extractAccessToken(data);
+  if (!accessToken) {
+
+    throw new Error('Đăng nhập thành công nhưng backend chưa trả access token đúng format.');
+  }
+
+  markLoggedIn(accessToken, data?.user || null);
+  console.log("LOGIN RESPONSE:", data);
+  console.log("TOKEN:", accessToken);
   return data;
 };
 
 export const logout = logoutSession;
+
+// ── Token helpers ─────────────────────────────────────────────────────────────
+
+export const extractAccessToken = (payload) => {
+  if (!payload || typeof payload !== 'object') return '';
+
+  return (
+    payload?.data?.accessToken||
+    payload?.tokens?.accessToken ||
+    payload?.tokens?.access_token ||
+    payload?.accessToken ||
+    payload?.access_token ||
+    payload?.token ||
+    payload?.data?.tokens?.accessToken ||
+    payload?.data?.tokens?.access_token ||
+    payload?.data?.accessToken ||
+    payload?.data?.access_token ||
+    payload?.data?.token ||
+    ''
+  );
+};
+
+export const getAccessToken = getToken;
+export const saveAccessToken = setToken;
+export const clearAccessToken = () => setToken(null);
+
+export const getAuthHeaders = () => {
+  const token = getToken();
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
+};
+
+// ── User storage helpers ──────────────────────────────────────────────────────
+
+export const getCurrentUser = getUser;
+export const saveCurrentUser = setUser;
+export const clearCurrentUser = () => setUser(null);
+export const clearAuthSession = clearSession;
+
+// ── Preferred name / phone maps ───────────────────────────────────────────────
+
+const getPreferredFullNameMap = () => {
+  const raw = localStorage.getItem(FULL_NAME_MAP_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const getPreferredPhoneMap = () => {
+  const raw = localStorage.getItem(PHONE_MAP_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+export const savePreferredFullName = (email, fullName) => {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedName = String(fullName || '').trim();
+  if (!normalizedEmail || !normalizedName) return;
+
+  const currentMap = getPreferredFullNameMap();
+  currentMap[normalizedEmail] = normalizedName;
+  localStorage.setItem(FULL_NAME_MAP_KEY, JSON.stringify(currentMap));
+};
+
+export const getPreferredFullName = (email) => {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!normalizedEmail) return '';
+  const currentMap = getPreferredFullNameMap();
+  return currentMap[normalizedEmail] || '';
+};
+
+export const savePreferredPhoneNumber = (email, phoneNumber) => {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedPhone = String(phoneNumber || '').trim();
+  if (!normalizedEmail || !normalizedPhone) return;
+
+  const currentMap = getPreferredPhoneMap();
+  currentMap[normalizedEmail] = normalizedPhone;
+  localStorage.setItem(PHONE_MAP_KEY, JSON.stringify(currentMap));
+};
+
+export const getPreferredPhoneNumber = (email) => {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!normalizedEmail) return '';
+  const currentMap = getPreferredPhoneMap();
+  return currentMap[normalizedEmail] || '';
+};
+
+// ── Display helpers ───────────────────────────────────────────────────────────
+
+const isAutoGeneratedUsername = (username) =>
+  /^user[_-]/i.test(String(username || '').trim());
+
+export const getDisplayName = (userInput) => {
+  const user = userInput || getCurrentUser() || {};
+  const fullName = String(user?.fullName || user?.fullname || '').trim();
+  if (fullName) return fullName;
+
+  const preferredFullName = getPreferredFullName(user?.email);
+  if (preferredFullName) return preferredFullName;
+
+  const username = String(user?.username || '').trim();
+  if (username && !isAutoGeneratedUsername(username)) return username;
+
+  return 'bạn';
+};
+
+export const getMyProfile = async () => {
+  return apiRequest(
+    API_ENDPOINTS.USER_ME,
+    { method: 'GET' },
+    'Không thể lấy thông tin người dùng',
+  );
+};
+
+export const TOKEN_KEY = 'accessToken';
+export const USER_KEY = 'user';

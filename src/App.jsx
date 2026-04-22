@@ -9,12 +9,12 @@ import Dashboard from "./pages/Dashboard";
 import CourtsPage from "./pages/CourtsPage";
 import BookingsPage from "./pages/BookingsPage";
 import CustomerManagement from "./pages/CustomerManagement";
-import HistoryPage from "./pages/HistoryPage";
-import ReviewsPage from "./pages/ReviewsPage";
 import ProfilePage from "./pages/ProfilePage";
 import UserProfilePage from "./pages/UserProfilePage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PricingPage from "./pages/PricingPage";
+import TimeSlotsPage from "./pages/TimeSlotsPage";
 import { restoreSession } from "./services/apiClient";
 import { getToken } from "./utils/auth";
 
@@ -114,14 +114,13 @@ function App() {
         }
       >
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="profile" element={<ProfilePage />} />
         <Route path="courts" element={<CourtsPage />} />
+        {/* <Route path="pricing" element={<PricingPage />} /> */}
         <Route path="bookings" element={<BookingsPage />} />
-        <Route path="customers" element={<CustomerManagement />} />
-        <Route path="history" element={<HistoryPage />} />
-        <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="timeslots" element={<TimeSlotsPage />} />
+        <Route path="customers" element={<CustomerManagement />} />{" "}
+        <Route path="profile" element={<ProfilePage />} />{" "}
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

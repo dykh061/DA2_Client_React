@@ -1,113 +1,148 @@
-import React from 'react';
-import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+import React from "react";
+import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 
-const BookingForm = ({ show, onHide, onSubmit, booking }) => {
-  const isEdit = !!booking;
+const BookingForm = ({
+  show,
+  onHide,
+  onSubmit,
+  formData,
+  handleChange,
+  editingBooking,
+}) => {
+  const isEdit = !!editingBooking;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    
-    // Format YYYY-MM-DD to DD/MM/YYYY
-    if (data.date) {
-      const [year, month, day] = data.date.split('-');
-      data.date = `${day}/${month}/${year}`;
-    }
-    
-    onSubmit(data);
+
+    onSubmit({
+      ...formData,
+      // đảm bảo format đồng bộ
+      start_time: formData.start_time,
+      end_time: formData.end_time,
+    });
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered className="booking-form-modal">
-      <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold">{isEdit ? 'Chỉnh sửa phiếu đặt sân' : 'Đặt sân mới'}</Modal.Title>
+    <Modal show={show} onHide={onHide} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {isEdit ? "Cập nhật đặt sân" : "Thêm đặt sân"}
+        </Modal.Title>
       </Modal.Header>
+
       <Form onSubmit={handleSubmit}>
-        <Modal.Body className="p-4">
+        <Modal.Body>
           <Row className="g-3">
+
+            {/* KHÁCH HÀNG */}
             <Col md={12}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Khách hàng</Form.Label>
-                <Form.Control 
-                  name="name"
-                  type="text" 
-                  placeholder="Nhập tên khách hàng" 
-                  defaultValue={booking?.name}
-                  required 
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                />
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Sân chọn</Form.Label>
-                <Form.Select 
-                  name="court"
-                  defaultValue={booking?.court || 'Sân số 1'}
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
-                >
-                  <option value="Sân số 1">Sân số 1</option>
-                  <option value="Sân số 2">Sân số 2</option>
-                  <option value="Sân số 3">Sân số 3</option>
-                  <option value="Sân số 4">Sân số 4</option>
-                  <option value="Sân số 5">Sân số 5</option>
-                  <option value="Sân số 6">Sân số 6</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Ngày đặt</Form.Label>
-                <Form.Control 
-                  name="date"
-                  type="date" 
-                  defaultValue={booking?.date ? booking.date.split('/').reverse().join('-') : new Date().toISOString().split('T')[0]}
+              <Form.Group>
+                <Form.Label>Khách hàng</Form.Label>
+                <Form.Control
+                  name="customer_name"
+                  value={formData.customer_name}
+                  onChange={handleChange}
                   required
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
                 />
               </Form.Group>
             </Col>
 
+            {/* SỐ ĐIỆN THOẠI */}
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Khung giờ</Form.Label>
-                <Form.Control 
-                  name="time"
-                  type="text" 
-                  placeholder="Ví dụ: 18:00 - 20:00" 
-                  defaultValue={booking?.time}
-                  required 
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
+              <Form.Group>
+                <Form.Label>Số điện thoại</Form.Label>
+                <Form.Control
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                 />
               </Form.Group>
             </Col>
 
+            {/* SÂN (ĐỒNG BỘ PRICING) */}
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase">Trạng thái</Form.Label>
-                <Form.Select 
+              <Form.Group>
+                <Form.Label>Sân</Form.Label>
+                <Form.Control
+                  name="court_name"
+                  value={formData.court_name}
+                  onChange={handleChange}
+                  placeholder="VD: Sân số 1"
+                  required
+                />
+              </Form.Group>
+            </Col>
+
+            {/* NGÀY */}
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Ngày</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+            </Col>
+
+            {/* GIỜ → CHUẨN HOÁ PRICING */}
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Khung giờ</Form.Label>
+
+                <Row>
+                  <Col>
+                    <Form.Control
+                      type="time"
+                      name="start_time"
+                      value={formData.start_time}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Col>
+
+                  <Col>
+                    <Form.Control
+                      type="time"
+                      name="end_time"
+                      value={formData.end_time}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Col>
+                </Row>
+              </Form.Group>
+            </Col>
+
+            {/* TRẠNG THÁI */}
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label>Trạng thái</Form.Label>
+                <Form.Select
                   name="status"
-                  defaultValue={booking?.status || 'Pending'}
-                  className="p-3 border-light rounded-3 shadow-none bg-light bg-opacity-50"
+                  value={formData.status}
+                  onChange={handleChange}
                 >
-                  <option value="Pending">Chờ xác nhận</option>
-                  <option value="Confirmed">Đã xác nhận</option>
-                  <option value="Cancelled">Đã hủy</option>
-                  <option value="Completed">Hoàn thành</option>
+                  <option value="PENDING">Chờ xác nhận</option>
+                  <option value="CONFIRMED">Đã xác nhận</option>
+                  <option value="COMPLETED">Hoàn thành</option>
+                  <option value="CANCELLED">Đã hủy</option>
                 </Form.Select>
               </Form.Group>
             </Col>
+
           </Row>
         </Modal.Body>
-        <Modal.Footer className="border-0 pt-0 p-4">
-          <Button variant="light" className="px-4 py-2 rounded-3 fw-bold" onClick={onHide}>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onHide}>
             Hủy
           </Button>
-          <Button variant="primary" type="submit" className="px-4 py-2 rounded-3 fw-bold shadow-sm">
-            {isEdit ? 'Cập nhật' : 'Xác nhận đặt'}
+
+          <Button variant="primary" type="submit">
+            {isEdit ? "Cập nhật" : "Thêm mới"}
           </Button>
         </Modal.Footer>
       </Form>
