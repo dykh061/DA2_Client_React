@@ -67,7 +67,9 @@ export const updateMyProfile = async ({ username, email, password, phone_number 
 export const getAllUsersForAdmin = async () => {
   return apiRequest(
     API_ENDPOINTS.USERS_ALL,
-    { method: 'GET' },
+    { method: 'GET' 
+      
+    },
     'Không thể tải danh sách người dùng',
   );
 };

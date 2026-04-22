@@ -32,11 +32,11 @@ const AdminLayout = () => {
     path: "/admin/courts",
     icon: <FaTableTennis />,
   },
-  {
-    title: "Quản lý giá sân",
-    path: "/admin/pricing",
-    icon: <FaCalendarAlt />,
-  },
+  // {
+  //   title: "Quản lý giá sân",
+  //   path: "/admin/pricing",
+  //   icon: <FaCalendarAlt />,
+  // },
   {
     title: "Quản lý đơn hàng",
     path: "/admin/bookings",

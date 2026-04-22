@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
 import { FaPlus, FaSearch } from "react-icons/fa";
-
+import { getAllBookings } from "../services/bookingService.js";
 import BookingTable from "../components/BookingTable.jsx";
 import BookingForm from "../components/BookingForm.jsx";
 
@@ -33,22 +33,21 @@ const BookingsPage = () => {
   });
 
   // ===================== API FETCH =====================
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("/api/bookings");
-      setData(res.data);
-    } catch (err) {
-      console.error("Fetch bookings error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchData = async () => {
+  setLoading(true);
+  try {
+    const res = await getAllBookings();
+    setData(res);
+  } catch (err) {
+    console.error( err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+useEffect(() => {
+  fetchData();
+}, []);
   // ===================== HANDLE CHANGE =====================
   const handleChange = (e) => {
     setFormData({
@@ -76,8 +75,7 @@ const BookingsPage = () => {
     setEditingItem(item);
     setFormData({
       customer_name: item.customer_name || item.name,
-      phone: item.phone || "",
-      court_id: item.court_id || "",
+      
       date: item.date || "",
       time: item.time || item.time_range,
       status: item.status,
@@ -132,13 +130,11 @@ const BookingsPage = () => {
   // ===================== MAPPING DATA =====================
   const mappedData = data.map((b) => ({
     id: b.id,
-    name: b.customer_name || b.name,
-    phone: b.phone || "",
-    court: b.court_name || b.court,
-    time: b.time_range || b.time,
-    date: b.date,
-    status: b.status,
-    total: b.total_amount || 0,
+    name: b.customer_name,
+    phone: b.phone_number,
+   
+    date: new Date(b.created_at).toLocaleDateString(),
+    status: b.status?.toUpperCase(),
   }));
 
   // ===================== FILTER =====================
@@ -153,7 +149,7 @@ const BookingsPage = () => {
       (item.date || "").includes(searchTerm.trim());
 
     const matchStatus =
-      !statusFilter || item.status === statusFilter;
+  !statusFilter || item.status.toLowerCase() === statusFilter.toLowerCase();
 
     return matchSearch && matchStatus;
   });

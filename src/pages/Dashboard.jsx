@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card } from "react-bootstrap";
 import { FaMoneyBillWave, FaChartPie, FaClock } from "react-icons/fa";
+import { getBookingStatistics } from "../services/bookingService.js";
 import axios from "axios";
 
 const Dashboard = () => {
@@ -9,37 +10,35 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalBills: 0,
-    occupancyRate: 0,
-    peakHours: [],
+    // occupancyRate: 0,
+    // peakHours: [],
   });
 
   const [loading, setLoading] = useState(false);
 
   // ================= API =================
   useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get("/api/bookings/statistics");
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const data= await getBookingStatistics();
 
-        const data = res.data || {};
+      // const data = res?.data || res || {};
+      setStats({
+        totalRevenue: data?.totalRevenue || 0,
+        totalBills: data?.totalBills || 0,
+        // occupancyRate:  0,
+        // peakHours:  [],
+      });
+    } catch (err) {
+      console.error( err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setStats({
-          totalRevenue: data.totalRevenue || 0,
-          totalBills: data.totalBills || 0,
-          occupancyRate: data.occupancyRate || 0,
-          peakHours: data.peakHours || [],
-        });
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
+  fetchStats();
+}, []);
   // ================= FORMAT STATS =================
   const statsDisplay = [
     {
@@ -49,23 +48,23 @@ const Dashboard = () => {
       color: "success",
       trend: `${stats.totalBills} hóa đơn`,
     },
-    {
-      title: "Tỷ lệ lấp đầy",
-      value: `${stats.occupancyRate || 0}%`,
-      icon: <FaChartPie />,
-      color: "primary",
-      trend: "Hiệu suất sân",
-    },
-    {
-      title: "Giờ cao điểm",
-      value:
-        stats.peakHours.length > 0
-          ? stats.peakHours.join(", ")
-          : "Chưa có dữ liệu",
-      icon: <FaClock />,
-      color: "warning",
-      trend: "Khung giờ vàng",
-    },
+    // {
+    //   title: "Tỷ lệ lấp đầy",
+    //   value: `${stats.occupancyRate || 0}%`,
+    //   icon: <FaChartPie />,
+    //   color: "primary",
+    //   trend: "Hiệu suất sân",
+    // },
+    // {
+    //   title: "Giờ cao điểm",
+    //   value:
+    //     stats.peakHours.length > 0
+    //       ? stats.peakHours.join(", ")
+    //       : "Chưa có dữ liệu",
+    //   icon: <FaClock />,
+    //   color: "warning",
+    //   trend: "Khung giờ vàng",
+    // },
   ];
 
   // ================= UI =================
