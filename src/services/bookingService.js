@@ -1,7 +1,7 @@
-import { API_ENDPOINTS } from '../config/api';
-import { getAuthHeaders } from './authService';
+import { API_ENDPOINTS } from "../config/api";
+import { getAuthHeaders } from "./authService";
 
-const BOOKING_CACHE_KEY = 'my_bookings_cache';
+const BOOKING_CACHE_KEY = "my_bookings_cache";
 
 const parseErrorMessage = async (res, fallbackMessage) => {
   try {
@@ -15,11 +15,22 @@ const parseErrorMessage = async (res, fallbackMessage) => {
 };
 
 const requestJson = async (url, options, fallbackMessage) => {
-  const res = await fetch(url, options);
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch {
+    const requestError = new Error(
+      "Không kết nối được backend. Hãy bật server BE (cổng 3000) rồi thử lại.",
+    );
+    requestError.status = 0;
+    throw requestError;
+  }
 
   if (!res.ok) {
     const errorMessage = await parseErrorMessage(res, fallbackMessage);
-    const requestError = new Error(`${errorMessage}`);
+    const requestError = new Error(
+      `${errorMessage}${res.status ? ` (HTTP ${res.status})` : ""}`,
+    );
     requestError.status = res.status;
     throw requestError;
   }
@@ -28,13 +39,18 @@ const requestJson = async (url, options, fallbackMessage) => {
   return res.json();
 };
 
-export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 'NORMAL' }) => {
+export const createBooking = async ({
+  courtId,
+  bookingDate,
+  timeSlotIds,
+  type = "NORMAL",
+}) => {
   return requestJson(
     API_ENDPOINTS.BOOKINGS,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
       body: JSON.stringify({
@@ -44,7 +60,7 @@ export const createBooking = async ({ courtId, bookingDate, timeSlotIds, type = 
         type,
       }),
     },
-    'Không thể đặt sân'
+    "Không thể đặt sân",
   );
 };
 
@@ -52,11 +68,10 @@ export const getMyBookings = async () => {
   const res = await requestJson(
     API_ENDPOINTS.BOOKINGS_HISTORY,
     {
-      method: 'GET',
+      method: "GET",
       headers: getAuthHeaders(),
-
     },
-    'Không thể lấy lịch sử đặt sân'
+    "Không thể lấy lịch sử đặt sân",
   );
 
   // backend trả { success, data: [...] }
@@ -64,14 +79,15 @@ export const getMyBookings = async () => {
 };
 
 export const getAllBookings = async () => {
-  const res = await requestJson(API_ENDPOINTS.BOOKINGS, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  },
-  'Không thể lấy danh sách tất cả booking'
-);
+  const res = await requestJson(
+    API_ENDPOINTS.BOOKINGS,
+    {
+      method: "GET",
+      headers: getAuthHeaders(),
+    },
+    "Không thể lấy danh sách tất cả booking",
+  );
 
- 
   return Array.isArray(res?.data) ? res.data : [];
 };
 
@@ -82,7 +98,7 @@ export const getBookingStatistics = async () => {
       method: "GET",
       headers: getAuthHeaders(),
     },
-    "Không thể lấy thống kê"
+    "Không thể lấy thống kê",
   );
 
   // res = { success, data }
