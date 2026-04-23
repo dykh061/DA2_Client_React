@@ -104,3 +104,54 @@ export const getBookingStatistics = async () => {
   // res = { success, data }
   return res?.data || { totalBills: 0, totalRevenue: 0 };
 };
+
+export const getBookingDetail = async (bookingId) => {
+  if (!bookingId) {
+    throw new Error("Thiếu mã đơn để lấy chi tiết đặt sân");
+  }
+
+  const res = await requestJson(
+    `${API_ENDPOINTS.BOOKINGS}/${bookingId}`,
+    {
+      method: "GET",
+      headers: getAuthHeaders(),
+    },
+    "Không thể lấy chi tiết booking",
+  );
+
+  return res?.data || null;
+};
+
+export const completeBooking = async (bookingId) => {
+  if (!bookingId) {
+    throw new Error("Thiếu mã đơn để xác nhận booking");
+  }
+
+  const res = await requestJson(
+    `${API_ENDPOINTS.BOOKINGS}/${bookingId}/complete`,
+    {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+    },
+    "Không thể xác nhận booking",
+  );
+
+  return res;
+};
+
+export const cancelBooking = async (bookingId) => {
+  if (!bookingId) {
+    throw new Error("Thiếu mã đơn để hủy booking");
+  }
+
+  const res = await requestJson(
+    `${API_ENDPOINTS.BOOKINGS}/${bookingId}/cancel`,
+    {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+    },
+    "Không thể hủy booking",
+  );
+
+  return res;
+};

@@ -1,13 +1,16 @@
-
 // Quản lý đặt sân
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Card, Button, Row, Col, InputGroup, Form } from "react-bootstrap";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import { getAllBookings } from "../services/bookingService.js";
+import {
+  getAllBookings,
+  completeBooking,
+  getBookingDetail,
+} from "../services/bookingService.js";
 import BookingTable from "../components/BookingTable.jsx";
 import BookingForm from "../components/BookingForm.jsx";
-
+import BookingDetailModal from "../components/BookingDetailModal.jsx";
 
 // ===================== STATE =====================
 const BookingsPage = () => {
@@ -16,10 +19,12 @@ const BookingsPage = () => {
 
   const [showModal, setShowModal] = useState(false);
 
-  const [editingItem, setEditingItem] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState("");
+  const [selectedBookingDetail, setSelectedBookingDetail] = useState(null);
 
   const [formData, setFormData] = useState({
     customer_name: "",
@@ -28,26 +33,24 @@ const BookingsPage = () => {
     date: "",
     time: "",
     status: "PENDING",
-
-
   });
 
   // ===================== API FETCH =====================
- const fetchData = async () => {
-  setLoading(true);
-  try {
-    const res = await getAllBookings();
-    setData(res);
-  } catch (err) {
-    console.error( err);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllBookings();
+      setData(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-useEffect(() => {
-  fetchData();
-}, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
   // ===================== HANDLE CHANGE =====================
   const handleChange = (e) => {
     setFormData({
@@ -58,7 +61,6 @@ useEffect(() => {
 
   // ===================== OPEN ADD =====================
   const handleOpenAdd = () => {
-    setEditingItem(null);
     setFormData({
       customer_name: "",
       phone: "",
@@ -70,27 +72,10 @@ useEffect(() => {
     setShowModal(true);
   };
 
-  // ===================== OPEN EDIT =====================
-  const handleOpenEdit = (item) => {
-    setEditingItem(item);
-    setFormData({
-      customer_name: item.customer_name || item.name,
-      
-      date: item.date || "",
-      time: item.time || item.time_range,
-      status: item.status,
-    });
-    setShowModal(true);
-  };
-
-  // ===================== SUBMIT (CREATE / UPDATE) =====================
+  // ===================== SUBMIT (CREATE) =====================
   const handleSubmit = async () => {
     try {
-      if (editingItem) {
-        await axios.put(`/api/bookings/${editingItem.id}`, formData);
-      } else {
-        await axios.post("/api/bookings", formData);
-      }
+      await axios.post("/api/bookings", formData);
 
       setShowModal(false);
       fetchData();
@@ -99,32 +84,48 @@ useEffect(() => {
     }
   };
 
-  // ===================== DELETE =====================
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa booking?")) {
-      try {
-        await axios.delete(`/api/bookings/${id}`);
-        fetchData();
-      } catch (err) {
-        console.error("Delete error:", err);
-      }
+  // ===================== CONFIRM BOOKING =====================
+  const handleCheckIn = async (id) => {
+    if (!window.confirm("Xác nhận đơn này là đã check-in và đã thanh toán?")) {
+      return;
+    }
+
+    try {
+      await completeBooking(id);
+      fetchData();
+    } catch (err) {
+      window.alert(err.message || "Xác nhận đơn thất bại");
     }
   };
 
-  // ===================== CHECK IN (PATCH) =====================
-  const handleCheckIn = async (id) => {
+  const handleOpenDetail = async (bookingId) => {
     try {
-      await axios.patch(`/api/bookings/${id}/complete`);
-      fetchData();
-    } catch (err) {
-      console.error("Check-in error:", err);
+      setShowDetailModal(true);
+      setIsLoadingDetail(true);
+      setDetailError("");
+      setSelectedBookingDetail(null);
+      const detail = await getBookingDetail(bookingId);
+      setSelectedBookingDetail(detail);
+    } catch (error) {
+      setDetailError(error.message || "Không thể tải chi tiết booking.");
+    } finally {
+      setIsLoadingDetail(false);
     }
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetailModal(false);
+    setDetailError("");
+    setSelectedBookingDetail(null);
   };
 
   // ===================== NORMALIZE =====================
   const normalize = (str) =>
     str
-      ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+      ? str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
       : "";
 
   // ===================== MAPPING DATA =====================
@@ -132,12 +133,17 @@ useEffect(() => {
     id: b.id,
     name: b.customer_name,
     phone: b.phone_number,
-   
+
     date: new Date(b.created_at).toLocaleDateString(),
     status: b.status?.toUpperCase(),
   }));
 
   // ===================== FILTER =====================
+  const normalizeStatusValue = (value) =>
+    String(value || "")
+      .toUpperCase()
+      .replace("CANCELLED", "CANCELED");
+
   const filteredData = mappedData.filter((item) => {
     const search = normalize(searchTerm);
 
@@ -149,7 +155,8 @@ useEffect(() => {
       (item.date || "").includes(searchTerm.trim());
 
     const matchStatus =
-  !statusFilter || item.status.toLowerCase() === statusFilter.toLowerCase();
+      !statusFilter ||
+      normalizeStatusValue(item.status) === normalizeStatusValue(statusFilter);
 
     return matchSearch && matchStatus;
   });
@@ -157,13 +164,11 @@ useEffect(() => {
   // ===================== UI =====================
   return (
     <div className="animate-slide-in">
-
       {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold mb-1">Quản lý Đặt sân</h2>
           <p className="text-muted small">
-
             Theo dõi và quản lý các lượt đặt sân trong hệ thống
           </p>
         </div>
@@ -172,8 +177,6 @@ useEffect(() => {
           onClick={handleOpenAdd}
           className="d-flex align-items-center shadow-sm px-4 py-2 rounded-3 fw-bold border-0"
           style={{ background: "linear-gradient(45deg, #FF8C00, #FFA500)" }}
-
-
         >
           <FaPlus className="me-2" /> Thêm đặt sân
         </Button>
@@ -183,7 +186,6 @@ useEffect(() => {
       <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
         <Card.Body className="p-4">
           <Row className="gy-3">
-
             <Col md={8}>
               <InputGroup className="bg-light bg-opacity-50 rounded-3 border border-light">
                 <InputGroup.Text className="bg-transparent border-0">
@@ -200,11 +202,7 @@ useEffect(() => {
             </Col>
 
             <Col md={4}>
-
-
               <Form.Select
-
-
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -212,25 +210,22 @@ useEffect(() => {
                 <option value="PENDING">Chờ xác nhận</option>
                 <option value="CONFIRMED">Đã xác nhận</option>
                 <option value="COMPLETED">Hoàn thành</option>
-                <option value="CANCELLED">Đã hủy</option>
+                <option value="CANCELED">Đã hủy đơn</option>
               </Form.Select>
             </Col>
-
           </Row>
         </Card.Body>
       </Card>
 
       {/* TABLE */}
       <div className="shadow-premium rounded-4 overflow-hidden bg-white border border-light">
-
         {loading ? (
           <p className="text-center py-4">Đang tải dữ liệu...</p>
         ) : (
           <BookingTable
             bookings={filteredData}
-            onEdit={handleOpenEdit}
-            onDelete={handleDelete}
-            onCheckIn={handleCheckIn}
+            onViewDetail={handleOpenDetail}
+            onConfirm={handleCheckIn}
           />
         )}
       </div>
@@ -238,15 +233,20 @@ useEffect(() => {
       {/* FORM */}
       <BookingForm
         show={showModal}
-
-
         onHide={() => setShowModal(false)}
         onSubmit={handleSubmit}
         formData={formData}
         handleChange={handleChange}
-        editingBooking={editingItem}
+        editingBooking={null}
       />
 
+      <BookingDetailModal
+        show={showDetailModal}
+        onHide={handleCloseDetail}
+        bookingDetail={selectedBookingDetail}
+        isLoading={isLoadingDetail}
+        error={detailError}
+      />
     </div>
   );
 };

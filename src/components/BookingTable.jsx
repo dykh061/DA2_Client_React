@@ -1,7 +1,7 @@
 import React from "react";
 import { Table, Button, Badge } from "react-bootstrap";
 
-const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
+const BookingTable = ({ bookings = [], onViewDetail, onConfirm }) => {
   const getStatus = (status) => {
     switch (status) {
       case "PENDING":
@@ -10,8 +10,9 @@ const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
         return { label: "Đã xác nhận", bg: "success" };
       case "COMPLETED":
         return { label: "Hoàn thành", bg: "info" };
+      case "CANCELED":
       case "CANCELLED":
-        return { label: "Đã hủy", bg: "secondary" };
+        return { label: "Đã hủy đơn", bg: "secondary" };
       default:
         return { label: "Không rõ", bg: "dark" };
     }
@@ -40,8 +41,6 @@ const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
 
                 <td className="fw-bold">{b.name}</td>
 
-               
-
                 <td>
                   <div className="small">{b.date}</div>
                   <div className="text-muted small">{b.time}</div>
@@ -54,18 +53,21 @@ const BookingTable = ({ bookings = [], onEdit, onDelete }) => {
                 <td className="text-end pe-4">
                   <Button
                     variant="link"
-                    className="text-primary p-0 me-3"
-                    onClick={() => onEdit(b)}
+                    className="text-success p-0 me-3"
+                    onClick={() => onViewDetail?.(b.id)}
                   >
-                    Sửa
+                    Chi tiết
                   </Button>
 
                   <Button
                     variant="link"
-                    className="text-danger p-0"
-                    onClick={() => onDelete(b.id)}
+                    className="text-primary p-0"
+                    onClick={() => onConfirm?.(b.id)}
+                    disabled={
+                      b.status === "COMPLETED" || b.status === "CANCELED"
+                    }
                   >
-                    Xóa
+                    Xác nhận
                   </Button>
                 </td>
               </tr>

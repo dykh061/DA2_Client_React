@@ -1,6 +1,5 @@
 /* --- GIỮ NGUYÊN TOÀN BỘ CODE CŨ CỦA BẠN TỪ ĐÂY --- */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
 
 :root {
   --bg: #eaf1ef;
@@ -24,7 +23,7 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   color: var(--text-900);
   background: var(--bg);
 }
@@ -517,7 +516,6 @@ body {
   font-weight: 600;
 }
 
-
 .court-list {
   margin-top: 20px;
   display: grid;
@@ -800,6 +798,73 @@ body {
   border-radius: 12px;
   padding: 12px;
   background: #ffffff;
+}
+
+.admin-user-item[role="button"] {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-user-item[role="button"]:hover {
+  box-shadow: 0 10px 18px rgba(6, 46, 27, 0.08);
+  transform: translateY(-2px);
+}
+
+.booking-detail-trigger {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  background: #f3fbf7;
+  color: #0d7f44;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.booking-cancel-trigger {
+  margin-top: 10px;
+  margin-left: 8px;
+  border: 1px solid #f3c5c5;
+  background: #fff1f1;
+  color: #c12b2b;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.booking-cancel-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.booking-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.booking-detail-card-item {
+  border: 1px solid #e5ebf1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f9fbfd;
+}
+
+.booking-detail-card-item span {
+  display: block;
+  color: #5b6471;
+  font-size: 0.85rem;
+}
+
+.booking-detail-card-item strong {
+  display: block;
+  margin-top: 4px;
+  color: #121825;
 }
 
 .admin-user-item strong {
@@ -1188,7 +1253,6 @@ body {
 
 /* --- PHẦN CSS MỚI CHO ADMIN (ĐÃ HỢP NHẤT VÀ TỐI ƯU) --- */
 
-
 :root {
   --admin-sidebar-bg: #111c44;
   --admin-accent: #4318ff;
@@ -1241,7 +1305,12 @@ body {
 
 .sidebar-divider {
   height: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   margin: 0 20px 20px;
 }
 
@@ -1365,6 +1434,12 @@ body {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

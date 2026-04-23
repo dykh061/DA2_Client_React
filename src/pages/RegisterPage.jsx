@@ -1,33 +1,28 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   clearAuthSession,
   getCurrentUser,
   getDisplayName,
   register,
-  savePreferredFullName,
-  savePreferredPhoneNumber,
-} from '../services/authService';
+} from "../services/authService";
 
 function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const currentUser = getCurrentUser();
   const greetingName = getDisplayName(currentUser);
 
   const handleLogout = () => {
     clearAuthSession();
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   };
 
   const handleChange = (event) => {
@@ -37,55 +32,38 @@ function RegisterPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrorMessage('');
-    setSuccessMessage('');
+    setErrorMessage("");
+    setSuccessMessage("");
 
     const email = formData.email.trim();
-    const fullName = formData.fullName.trim();
-    const username = formData.username.trim();
-    const phone = formData.phone.trim();
     const password = formData.password;
     const confirmPassword = formData.confirmPassword;
 
-    if (!fullName || !username || !email || !phone || !password || !confirmPassword) {
-      setErrorMessage('Vui lòng nhập đầy đủ họ tên, username, email, số điện thoại và mật khẩu.');
-      return;
-    }
-
-    // Validate số điện thoại Việt Nam: bắt đầu 0, 10-11 chữ số
-    const phoneRegex = /^0\d{9,10}$/;
-    if (!phoneRegex.test(phone)) {
-      setErrorMessage('Số điện thoại không hợp lệ. Vui lòng nhập số Việt Nam (0xxxxxxxxx hoặc 0xxxxxxxxxx).');
+    if (!email || !password || !confirmPassword) {
+      setErrorMessage("Vui lòng nhập đầy đủ email và mật khẩu.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage('Mật khẩu xác nhận không khớp.');
+      setErrorMessage("Mật khẩu xác nhận không khớp.");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      if (fullName) {
-        savePreferredFullName(email, fullName);
-      }
-      if (phone) {
-        savePreferredPhoneNumber(email, phone);
-      }
       await register({
         email,
         password,
-        fullName,
-        username,
-        phoneNumber: phone,
       });
 
-      setSuccessMessage('Đăng ký thành công. Đang chuyển sang trang đăng nhập...');
+      setSuccessMessage(
+        "Đăng ký thành công. Đang chuyển sang trang đăng nhập...",
+      );
       setTimeout(() => {
-        navigate('/login', { replace: true });
+        navigate("/login", { replace: true });
       }, 1200);
     } catch (error) {
-      setErrorMessage(error.message || 'Không thể đăng ký. Vui lòng thử lại.');
+      setErrorMessage(error.message || "Không thể đăng ký. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +103,11 @@ function RegisterPage() {
               <i className="fa-regular fa-user" aria-hidden="true"></i>
               {`Xin chào ${greetingName}`}
             </Link>
-            <button type="button" className="menu-link logout-btn" onClick={handleLogout}>
+            <button
+              type="button"
+              className="menu-link logout-btn"
+              onClick={handleLogout}
+            >
               Đăng xuất
             </button>
           </div>
@@ -147,26 +129,6 @@ function RegisterPage() {
           <p>Tạo tài khoản mới để đặt sân</p>
 
           <form className="login-form" onSubmit={handleSubmit}>
-            <label htmlFor="fullName">Họ và tên</label>
-            <input
-              id="fullName"
-              type="text"
-              placeholder="Nguyễn Văn A"
-              required
-              value={formData.fullName}
-              onChange={handleChange}
-            />
-
-            <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              type="text"
-              placeholder="trantrungloc"
-              required
-              value={formData.username}
-              onChange={handleChange}
-            />
-
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -174,16 +136,6 @@ function RegisterPage() {
               placeholder="example@email.com"
               required
               value={formData.email}
-              onChange={handleChange}
-            />
-
-            <label htmlFor="phone">Số điện thoại</label>
-            <input
-              id="phone"
-              type="text"
-              placeholder="0912345678"
-              required
-              value={formData.phone}
               onChange={handleChange}
             />
 
@@ -207,11 +159,23 @@ function RegisterPage() {
               onChange={handleChange}
             />
 
-            {errorMessage && <p className="form-feedback form-feedback-error">{errorMessage}</p>}
-            {successMessage && <p className="form-feedback form-feedback-success">{successMessage}</p>}
+            {errorMessage && (
+              <p className="form-feedback form-feedback-error">
+                {errorMessage}
+              </p>
+            )}
+            {successMessage && (
+              <p className="form-feedback form-feedback-success">
+                {successMessage}
+              </p>
+            )}
 
-            <button type="submit" className="login-submit-btn" disabled={isSubmitting}>
-              {isSubmitting ? 'Đang đăng ký...' : 'Đăng ký'}
+            <button
+              type="submit"
+              className="login-submit-btn"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Đang đăng ký..." : "Đăng ký"}
             </button>
           </form>
 
